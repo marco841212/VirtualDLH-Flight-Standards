@@ -1,0 +1,7 @@
+{
+  "id": "virtualdlh-flight-standards",
+  "name": "VirtualDLH Flight Standards Monitor",
+  "version": "1.0.0",
+  "description": "VirtualDLH cockpit tracking and pilot scoring plugin foundation.",
+  "author": "VirtualDLH"
+}
