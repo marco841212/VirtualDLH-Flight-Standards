@@ -1,9 +1,0 @@
-export const StratosEvents = {
-    STARTED: "FLIGHT_STARTED",
-    TAKEOFF: "TAKEOFF",
-    CRUISE: "CRUISE",
-    APPROACH: "APPROACH",
-    LANDING: "LANDING",
-    COMPLETE: "FLIGHT_COMPLETE"
-};
-//# sourceMappingURL=events.js.map

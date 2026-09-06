@@ -1,1 +1,0 @@
-{"version":3,"file":"events.js","sourceRoot":"","sources":["../../src/stratos/events.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,MAAM,aAAa,GAAG;IAC3B,OAAO,EAAE,gBAAgB;IACzB,OAAO,EAAE,SAAS;IAClB,MAAM,EAAE,QAAQ;IAChB,QAAQ,EAAE,UAAU;IACpB,OAAO,EAAE,SAAS;IAClB,QAAQ,EAAE,iBAAiB;CAC5B,CAAC"}

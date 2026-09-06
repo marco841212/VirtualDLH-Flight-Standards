@@ -1,1 +1,0 @@
-{"version":3,"file":"pluginCheck.js","sourceRoot":"","sources":["../../src/validation/pluginCheck.ts"],"names":[],"mappings":"AAAA,MAAM,OAAO,eAAe;IAE1B,QAAQ;QAEN,OAAO;YACL,YAAY,EAAE,IAAI;YAClB,YAAY,EAAE,IAAI;YAClB,YAAY,EAAE,IAAI;YAClB,YAAY,EAAE,IAAI;YAClB,SAAS,EACP,IAAI,IAAI,EAAE,CAAC,WAAW,EAAE;SAC3B,CAAC;IAEJ,CAAC;CAEF"}
