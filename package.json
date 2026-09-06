@@ -1,0 +1,14 @@
+{
+  "name": "virtualdlh-flight-standards",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "VirtualDLH Stratos Cockpit Standards Plugin",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

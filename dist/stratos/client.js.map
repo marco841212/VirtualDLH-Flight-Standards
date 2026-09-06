@@ -1,0 +1,1 @@
+{"version":3,"file":"client.js","sourceRoot":"","sources":["../../src/stratos/client.ts"],"names":[],"mappings":"AAKA,MAAM,UAAU,mBAAmB,CAAC,MAAqB;IACvD,OAAO;QACL,QAAQ,EAAE,MAAM,CAAC,QAAQ;QACzB,SAAS,EAAE,KAAK;QAChB,OAAO;YACL,IAAI,CAAC,SAAS,GAAG,IAAI,CAAC;YACtB,OAAO,IAAI,CAAC,SAAS,CAAC;QACxB,CAAC;KACF,CAAC;AACJ,CAAC"}

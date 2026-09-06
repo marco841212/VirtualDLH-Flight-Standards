@@ -1,0 +1,13 @@
+export const flightPhases = {
+    PREFLIGHT: "PREFLIGHT",
+    PUSHBACK: "PUSHBACK",
+    TAXI: "TAXI",
+    TAKEOFF: "TAKEOFF",
+    CLIMB: "CLIMB",
+    CRUISE: "CRUISE",
+    DESCENT: "DESCENT",
+    APPROACH: "APPROACH",
+    LANDING: "LANDING",
+    SHUTDOWN: "SHUTDOWN"
+};
+//# sourceMappingURL=flightPhases.js.map
