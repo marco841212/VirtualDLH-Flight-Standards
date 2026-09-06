@@ -1,3 +1,10 @@
-# VirtualDLH Flight Standards Monitor v1.0.0
+# VirtualDLH Flight Standards Monitor
 
-Development package for VirtualDLH cockpit tracking, scoring, FOQA logging, and Stratos integration.
+Operational scoring plugin for VirtualDLH.
+
+Features:
+- Aircraft procedure tracking
+- Lights and control monitoring
+- Landing evaluation
+- Pilot points and ranking
+- Crew Center integration

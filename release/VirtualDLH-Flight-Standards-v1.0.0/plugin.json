@@ -1,7 +1,14 @@
 {
-  "id": "virtualdlh-flight-standards",
-  "name": "VirtualDLH Flight Standards Monitor",
+  "id": "virtualdlh-cockpit-standards",
+  "name": "VirtualDLH Cockpit Standards Plugin",
   "version": "1.0.0",
-  "description": "VirtualDLH cockpit tracking and pilot scoring plugin foundation.",
-  "author": "VirtualDLH"
+  "description": "VirtualDLH Stratos plugin for cockpit procedure tracking, SOP scoring, and pilot performance reports.",
+  "author": "VirtualDLH",
+  "private": true,
+  "type": "stratos-plugin",
+  "permissions": [
+    "flight.telemetry",
+    "flight.events",
+    "aircraft.data"
+  ]
 }
