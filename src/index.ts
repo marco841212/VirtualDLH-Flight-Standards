@@ -1,47 +1,95 @@
+import { PluginValidator } from "./validation/pluginCheck";
+import { PilotHistory } from "./database/pilotHistory";
+import { PilotReportGenerator } from "./reports/pilotReport";
+import { AdminReportGenerator } from "./reports/adminReport";
+import { VirtualDLHConfig } from "./config/virtualdlh";
+import { ScoringEngine } from "./scoring/scoringEngine";
 import { CockpitTracker } from "./cockpit/tracker";
-import { ScoringEngine } from "./scoring/engine";
-
-export interface StratosPluginContext {
-  flightId: string;
-  aircraft: string;
-  phase: string;
-}
 
 export class VirtualDLHCockpitStandardsPlugin {
 
-  private cockpit: CockpitTracker;
-  private scoring: ScoringEngine;
+    private validator = new PluginValidator();
+    private history = new PilotHistory();
+    private reports = new PilotReportGenerator();
+    private adminReports = new AdminReportGenerator();
+    private scoring = new ScoringEngine();
+    private cockpit = new CockpitTracker();
 
-  constructor() {
-    this.cockpit = new CockpitTracker();
-    this.scoring = new ScoringEngine();
-  }
+    initialize() {
 
-  onFlightStart(context: StratosPluginContext) {
-    console.log(
-      "VirtualDLH Cockpit Standards started",
-      context.flightId
-    );
+        return {
+            plugin: VirtualDLHConfig.pluginName,
+            version: VirtualDLHConfig.version,
+            status: this.validator.validate()
+        };
 
-    this.cockpit.initialize(context.aircraft);
-  }
+    }
 
-  onFlightEvent(event: string, data: unknown) {
 
-    this.cockpit.processEvent(event, data);
+    startFlight(
+        pilot:string,
+        aircraft:string,
+        route:string
+    ) {
 
-    this.scoring.evaluate(
-      event,
-      this.cockpit.getResults()
-    );
-  }
+        this.cockpit.initialize(aircraft);
 
-  getReport() {
-    return {
-      cockpit: this.cockpit.getResults(),
-      score: this.scoring.getScore()
-    };
-  }
+        return {
+            pilot,
+            aircraft,
+            route,
+            message:
+            "VirtualDLH Cockpit Standards started"
+        };
+
+    }
+
+
+    completeFlight(
+        pilot:string,
+        aircraft:string,
+        route:string
+    ){
+
+        const score =
+        this.scoring.getScore();
+
+
+        const report =
+        this.reports.generate({
+
+            pilot,
+            aircraft,
+            route,
+            score,
+            grade:
+            score >=95
+            ? "Platinum Pilot"
+            : "Gold Pilot",
+
+            strengths:[],
+            improvements:[]
+
+        });
+
+
+        this.history.addFlight({
+
+            pilot,
+            aircraft,
+            flight:route,
+            score,
+            date:
+            new Date().toISOString()
+
+        });
+
+
+        return report;
+
+    }
+
 }
+
 
 export default VirtualDLHCockpitStandardsPlugin;
