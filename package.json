@@ -2,16 +2,13 @@
   "name": "virtualdlh-flight-standards",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
+  "description": "VirtualDLH Stratos Cockpit Standards Plugin",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "build": "tsc",
+    "test": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "vite": "^5.0.0"
+    "typescript": "^5.4.0"
   }
 }
