@@ -1,0 +1,8 @@
+{
+  "id": "virtualdlh-flight-standards",
+  "name": "VirtualDLH Flight Standards Monitor",
+  "version": "1.0.0",
+  "description": "VirtualDLH operational scoring, aircraft procedure tracking, and pilot progression system.",
+  "author": "VirtualDLH",
+  "private": true
+}
