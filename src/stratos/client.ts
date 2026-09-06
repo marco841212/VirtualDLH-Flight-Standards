@@ -1,17 +1,14 @@
 import { StratosConfig } from "../config/stratos.js";
 
-
 export class StratosClient {
 
     private token?: string;
 
-
     constructor(token?: string) {
-    this.token =
-        token ??
-        process.env.STRATOS_TOKEN;
-}
-
+        this.token =
+            token ??
+            process.env.STRATOS_TOKEN?.trim();
+    }
 
     async request(
         endpoint: string,
@@ -22,57 +19,42 @@ export class StratosClient {
             `${StratosConfig.baseURL}${endpoint}`,
             {
                 ...options,
-
                 headers: {
                     ...StratosConfig.headers,
-
                     ...(this.token && {
                         Authorization:
                         `Bearer ${this.token}`
-                    }),
-
-                    ...options.headers
+                    })
                 }
             }
         );
 
-
         return response.json();
-
     }
 
-
-
     async verifyPilot() {
-
         return this.request(
             StratosConfig.endpoints.verify
         );
-
     }
 
-
-
     async getAircraft() {
-
         return this.request(
             StratosConfig.endpoints.aircraft
         );
-
     }
 
-
     async startFlight(data: any) {
-
         return this.request(
             StratosConfig.endpoints.startFlight,
             {
+                method: "POST",
+                body: JSON.stringify(data)
             }
         );
-
     }
-    async updateFlight(data: any) {
 
+    async updateFlight(data: any) {
         return this.request(
             StratosConfig.endpoints.updateFlight,
             {
@@ -80,12 +62,9 @@ export class StratosClient {
                 body: JSON.stringify(data)
             }
         );
-
     }
 
-
     async completeFlight(data: any) {
-
         return this.request(
             StratosConfig.endpoints.completeFlight,
             {
@@ -93,7 +72,5 @@ export class StratosClient {
                 body: JSON.stringify(data)
             }
         );
-
     }
-
 }
