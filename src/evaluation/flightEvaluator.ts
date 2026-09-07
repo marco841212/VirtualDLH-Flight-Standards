@@ -19,6 +19,10 @@ import {
 } from "../sop/landingRules.js";
 
 import {
+  calculateFlightGrade
+} from "../scoring/flightGrade.js";
+
+import {
   FOQAScoringEngine
 } from "../foqa/scoring.js";
 
@@ -30,6 +34,7 @@ import {
   FOQAEvents,
   FOQAData
 } from "../foqa/events.js";
+
 
 
 export interface FlightEvaluation {
@@ -44,6 +49,14 @@ export interface FlightEvaluation {
 
   trainingRequired: boolean;
 
+  cruiseScore: number;
+
+  approachScore: number;
+
+  landingScore: number;
+
+  foqaScore: number;
+
   violations: string[];
 
   notes: string[];
@@ -52,10 +65,6 @@ export interface FlightEvaluation {
 
   recommendations: string[];
 
-  approachScore: number;
-
-  landingScore: number;
-
 }
 
 
@@ -63,15 +72,24 @@ export interface FlightEvaluation {
 export class FlightEvaluator {
 
 
-  private phaseDetector = new PhaseDetector();
+  private phaseDetector =
+    new PhaseDetector();
 
-  private sopEngine = new SOPEngine();
 
-  private foqaEvents = new FOQAEvents();
+  private sopEngine =
+    new SOPEngine();
 
-  private exceedanceEngine = new ExceedanceEngine();
 
-  private scoringEngine = new FOQAScoringEngine();
+  private foqaEvents =
+    new FOQAEvents();
+
+
+  private exceedanceEngine =
+    new ExceedanceEngine();
+
+
+  private scoringEngine =
+    new FOQAScoringEngine();
 
 
 
@@ -86,16 +104,20 @@ export class FlightEvaluator {
       );
 
 
+
     const sopResult =
       this.sopEngine.evaluateFlight({
 
         cruise: {
 
-          altitude: telemetry.altitude,
+          altitude:
+            telemetry.altitude,
 
-          targetAltitude: telemetry.altitude,
+          targetAltitude:
+            telemetry.altitude,
 
-          speed: telemetry.groundSpeed
+          speed:
+            telemetry.groundSpeed
 
         }
 
@@ -105,21 +127,29 @@ export class FlightEvaluator {
 
     const approachData: ApproachData = {
 
-      altitude: telemetry.altitude,
+      altitude:
+        telemetry.altitude,
 
-      airspeed: telemetry.groundSpeed,
+      airspeed:
+        telemetry.groundSpeed,
 
-      targetSpeed: 140,
+      targetSpeed:
+        140,
 
-      verticalSpeed: telemetry.verticalSpeed,
+      verticalSpeed:
+        telemetry.verticalSpeed,
 
-      gearDown: true,
+      gearDown:
+        true,
 
-      flapsConfigured: true,
+      flapsConfigured:
+        true,
 
-      unstableApproach: false
+      unstableApproach:
+        false
 
     };
+
 
 
     const approachResult =
@@ -131,21 +161,29 @@ export class FlightEvaluator {
 
     const landingData: LandingData = {
 
-      touchdownRate: -150,
+      touchdownRate:
+        -150,
 
-      touchdownDistance: 900,
+      touchdownDistance:
+        900,
 
-      runwayLength: 3000,
+      runwayLength:
+        3000,
 
-      centerlineDeviation: 2,
+      centerlineDeviation:
+        2,
 
-      reverseThrustUsed: true,
+      reverseThrustUsed:
+        true,
 
-      brakingIssue: false,
+      brakingIssue:
+        false,
 
-      bouncedLanding: false
+      bouncedLanding:
+        false
 
     };
+
 
 
     const landingResult =
@@ -157,17 +195,23 @@ export class FlightEvaluator {
 
     const foqaData: FOQAData = {
 
-      airspeed: telemetry.groundSpeed,
+      airspeed:
+        telemetry.groundSpeed,
 
-      altitude: telemetry.altitude,
+      altitude:
+        telemetry.altitude,
 
-      verticalSpeed: telemetry.verticalSpeed,
+      verticalSpeed:
+        telemetry.verticalSpeed,
 
-      bankAngle: 0,
+      bankAngle:
+        0,
 
-      approachStable: true
+      approachStable:
+        true
 
     };
+
 
 
     const events =
@@ -182,48 +226,98 @@ export class FlightEvaluator {
       );
 
 
-    const score =
+    const foqaResult =
       this.scoringEngine.calculate(
         sopResult.overallScore,
         exceedances
       );
 
 
+
+    const finalGrade =
+      calculateFlightGrade({
+
+        cruiseScore:
+          sopResult.overallScore,
+
+        approachScore:
+          approachResult.score,
+
+        landingScore:
+          landingResult.score,
+
+        foqaScore:
+          foqaResult.finalScore
+
+      });
+
+
+
     return {
 
-      phase: phase,
+      phase,
 
-      score: score.finalScore,
+      score:
+        finalGrade.score,
 
-      passed: score.finalScore >= 80,
+      passed:
+        finalGrade.passed,
 
-      rating: score.rating,
+      rating:
+        finalGrade.rating,
 
-      trainingRequired: score.trainingRequired,
+      trainingRequired:
+        finalGrade.trainingRequired,
+
+
+      cruiseScore:
+        sopResult.overallScore,
+
+
+      approachScore:
+        approachResult.score,
+
+
+      landingScore:
+        landingResult.score,
+
+
+      foqaScore:
+        foqaResult.finalScore,
+
 
       violations: [
+
         ...sopResult.violations,
+
         ...approachResult.violations,
+
         ...landingResult.violations
+
       ],
+
 
       notes: [
+
         ...sopResult.notes,
+
         ...approachResult.notes,
+
         ...landingResult.notes
+
       ],
 
-      exceedances: exceedances.map(
-        item => item.event
-      ),
 
-      recommendations: exceedances.map(
-        item => item.trainingRecommendation
-      ),
+      exceedances:
+        exceedances.map(
+          item => item.event
+        ),
 
-      approachScore: approachResult.score,
 
-      landingScore: landingResult.score
+      recommendations:
+        exceedances.map(
+          item => item.trainingRecommendation
+        )
 
     };
 
