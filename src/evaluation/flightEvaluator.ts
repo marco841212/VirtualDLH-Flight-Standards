@@ -1,4 +1,5 @@
-import {
+import { evaluateLanding, LandingData }
+from "../sop/landingRules.js";import {
   PhaseDetector,
   FlightTelemetry,
   FlightPhase
