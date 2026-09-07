@@ -1,36 +1,148 @@
-export interface PilotFlightReport {
-  pilot: string;
+export interface PilotReportData {
+
+  pilotName: string;
+
+  flightNumber: string;
+
   aircraft: string;
+
   route: string;
+
   score: number;
-  grade: string;
-  strengths: string[];
-  improvements: string[];
+
+  rating: string;
+
+  trainingRequired: boolean;
+
+  sopPhases: Record<string, number>;
+
+  exceedances: string[];
+
+  recommendations: string[];
+
 }
+
+
 
 export class PilotReportGenerator {
 
-  generate(data: PilotFlightReport) {
 
-    return {
-      title: "VirtualDLH Flight Standards Report",
+  generate(
+    data: PilotReportData
+  ): string {
 
-      pilot: data.pilot,
 
-      aircraft: data.aircraft,
+    let report = "";
 
-      route: data.route,
 
-      finalScore: `${data.score}/100`,
 
-      grade: data.grade,
+    report += "VirtualDLH Flight Performance Report\n";
 
-      strengths: data.strengths,
+    report += "=================================\n\n";
 
-      improvements: data.improvements,
 
-      generatedAt: new Date().toISOString()
-    };
+    report += `Pilot: ${data.pilotName}\n`;
+
+    report += `Flight: ${data.flightNumber}\n`;
+
+    report += `Aircraft: ${data.aircraft}\n`;
+
+    report += `Route: ${data.route}\n\n`;
+
+
+
+    report += `Overall Score: ${data.score}%\n`;
+
+    report += `Rating: ${data.rating}\n\n`;
+
+
+
+    report += "SOP Performance:\n";
+
+    report += "----------------\n";
+
+
+    for (
+      const phase in data.sopPhases
+    ) {
+
+      report +=
+        `${phase}: ${data.sopPhases[phase]}%\n`;
+
+    }
+
+
+
+    report += "\nFOQA Findings:\n";
+
+    report += "--------------\n";
+
+
+    if (
+      data.exceedances.length === 0
+    ) {
+
+      report +=
+        "No operational exceedances detected.\n";
+
+    }
+
+    else {
+
+      for (
+        const event of data.exceedances
+      ) {
+
+        report +=
+          `- ${event}\n`;
+
+      }
+
+    }
+
+
+
+    report += "\nTraining Recommendations:\n";
+
+    report += "-------------------------\n";
+
+
+    if (
+      data.recommendations.length === 0
+    ) {
+
+      report +=
+        "No additional training required.\n";
+
+    }
+
+    else {
+
+      for (
+        const item of data.recommendations
+      ) {
+
+        report +=
+          `- ${item}\n`;
+
+      }
+
+    }
+
+
+
+    report += "\nFinal Status:\n";
+
+    report += "-------------\n";
+
+
+    report +=
+      data.trainingRequired
+        ? "TRAINING REVIEW REQUIRED\n"
+        : "FLIGHT STANDARDS PASSED\n";
+
+
+    return report;
 
   }
 

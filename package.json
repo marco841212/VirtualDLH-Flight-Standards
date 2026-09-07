@@ -6,11 +6,19 @@
   "description": "VirtualDLH Stratos Cockpit Standards Plugin",
   "scripts": {
     "build": "tsc",
-    "test": "tsc --noEmit"
+    "test": "tsc --noEmit",
+    "test:flight": "npm run build && node dist/tests/normalFlight.test.js",
+    "test:hardlanding": "npm run build && node dist/tests/hardLanding.test.js",
+    "test:unstable": "npm run build && node dist/tests/unstableApproach.test.js",
+    "test:overspeed": "npm run build && node dist/tests/overspeed.test.js",
+    "test:sinkrate": "npm run build && node dist/tests/sinkRate.test.js",
+    "test:approach": "npm run build && node dist/tests/approach.test.js",
+    "test:landing": "npm run build && node dist/tests/landing.test.js"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "dotenv": "^17.4.2"
