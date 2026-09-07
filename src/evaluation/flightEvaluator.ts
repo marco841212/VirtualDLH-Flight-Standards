@@ -1,5 +1,4 @@
-import { evaluateLanding, LandingData }
-from "../sop/landingRules.js";import {
+import {
   PhaseDetector,
   FlightTelemetry,
   FlightPhase
@@ -8,6 +7,16 @@ from "../sop/landingRules.js";import {
 import {
   SOPEngine
 } from "../sop/sopEngine.js";
+
+import {
+  evaluateApproach,
+  ApproachData
+} from "../sop/approachRules.js";
+
+import {
+  evaluateLanding,
+  LandingData
+} from "../sop/landingRules.js";
 
 import {
   FOQAScoringEngine
@@ -43,6 +52,10 @@ export interface FlightEvaluation {
 
   recommendations: string[];
 
+  approachScore: number;
+
+  landingScore: number;
+
 }
 
 
@@ -50,40 +63,15 @@ export interface FlightEvaluation {
 export class FlightEvaluator {
 
 
-  private phaseDetector: PhaseDetector;
+  private phaseDetector = new PhaseDetector();
 
-  private sopEngine: SOPEngine;
+  private sopEngine = new SOPEngine();
 
-  private foqaEvents: FOQAEvents;
+  private foqaEvents = new FOQAEvents();
 
-  private exceedanceEngine: ExceedanceEngine;
+  private exceedanceEngine = new ExceedanceEngine();
 
-  private scoringEngine: FOQAScoringEngine;
-
-
-
-  constructor() {
-
-    this.phaseDetector =
-      new PhaseDetector();
-
-
-    this.sopEngine =
-      new SOPEngine();
-
-
-    this.foqaEvents =
-      new FOQAEvents();
-
-
-    this.exceedanceEngine =
-      new ExceedanceEngine();
-
-
-    this.scoringEngine =
-      new FOQAScoringEngine();
-
-  }
+  private scoringEngine = new FOQAScoringEngine();
 
 
 
@@ -98,20 +86,16 @@ export class FlightEvaluator {
       );
 
 
-
     const sopResult =
       this.sopEngine.evaluateFlight({
 
         cruise: {
 
-          altitude:
-            telemetry.altitude,
+          altitude: telemetry.altitude,
 
-          targetAltitude:
-            telemetry.altitude,
+          targetAltitude: telemetry.altitude,
 
-          speed:
-            telemetry.groundSpeed
+          speed: telemetry.groundSpeed
 
         }
 
@@ -119,25 +103,71 @@ export class FlightEvaluator {
 
 
 
-    const foqaData: FOQAData = {
+    const approachData: ApproachData = {
 
-      airspeed:
-        telemetry.groundSpeed,
+      altitude: telemetry.altitude,
 
-      altitude:
-        telemetry.altitude,
+      airspeed: telemetry.groundSpeed,
 
-      verticalSpeed:
-        telemetry.verticalSpeed,
+      targetSpeed: 140,
 
-      bankAngle:
-        0,
+      verticalSpeed: telemetry.verticalSpeed,
 
-      approachStable:
-        true
+      gearDown: true,
+
+      flapsConfigured: true,
+
+      unstableApproach: false
 
     };
 
+
+    const approachResult =
+      evaluateApproach(
+        approachData
+      );
+
+
+
+    const landingData: LandingData = {
+
+      touchdownRate: -150,
+
+      touchdownDistance: 900,
+
+      runwayLength: 3000,
+
+      centerlineDeviation: 2,
+
+      reverseThrustUsed: true,
+
+      brakingIssue: false,
+
+      bouncedLanding: false
+
+    };
+
+
+    const landingResult =
+      evaluateLanding(
+        landingData
+      );
+
+
+
+    const foqaData: FOQAData = {
+
+      airspeed: telemetry.groundSpeed,
+
+      altitude: telemetry.altitude,
+
+      verticalSpeed: telemetry.verticalSpeed,
+
+      bankAngle: 0,
+
+      approachStable: true
+
+    };
 
 
     const events =
@@ -146,12 +176,10 @@ export class FlightEvaluator {
       );
 
 
-
     const exceedances =
       this.exceedanceEngine.evaluate(
         events
       );
-
 
 
     const score =
@@ -161,43 +189,41 @@ export class FlightEvaluator {
       );
 
 
-
-    const recommendations =
-      exceedances.map(
-        item =>
-          item.trainingRecommendation
-      );
-
-
-
     return {
 
-      phase,
+      phase: phase,
 
-      score:
-        score.finalScore,
+      score: score.finalScore,
 
-      passed:
-        score.finalScore >= 80,
+      passed: score.finalScore >= 80,
 
-      rating:
-        score.rating,
+      rating: score.rating,
 
-      trainingRequired:
-        score.trainingRequired,
+      trainingRequired: score.trainingRequired,
 
-      violations:
-        sopResult.violations,
+      violations: [
+        ...sopResult.violations,
+        ...approachResult.violations,
+        ...landingResult.violations
+      ],
 
-      notes:
-        sopResult.notes,
+      notes: [
+        ...sopResult.notes,
+        ...approachResult.notes,
+        ...landingResult.notes
+      ],
 
-      exceedances:
-        exceedances.map(
-          item => item.event
-        ),
+      exceedances: exceedances.map(
+        item => item.event
+      ),
 
-      recommendations
+      recommendations: exceedances.map(
+        item => item.trainingRecommendation
+      ),
+
+      approachScore: approachResult.score,
+
+      landingScore: landingResult.score
 
     };
 
