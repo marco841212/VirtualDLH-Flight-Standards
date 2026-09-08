@@ -32,13 +32,15 @@ export interface FOQAEvent {
 
 export interface FOQAData {
 
-  airspeed: number;
+  airspeed?: number;
 
   altitude: number;
 
   verticalSpeed: number;
 
-  bankAngle: number;
+  bankAngle?: number;
+
+  overspeedWarning?: boolean;
 
   landingRate?: number;
 
@@ -85,7 +87,7 @@ export class FOQAEvents {
 
     // Overspeed detection
     if (
-      data.airspeed > 340
+      data.overspeedWarning === true
     ) {
 
       events.push({
@@ -171,6 +173,7 @@ export class FOQAEvents {
 
     // Bank angle
     if (
+      data.bankAngle !== undefined &&
       Math.abs(data.bankAngle) > 35
     ) {
 

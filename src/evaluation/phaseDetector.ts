@@ -18,6 +18,8 @@ export interface FlightTelemetry {
 
   altitudeAgl?: number;
 
+  cruiseAltitude?: number;
+
   groundSpeed: number;
 
   indicatedAirspeed?: number;

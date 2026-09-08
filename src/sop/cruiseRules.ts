@@ -16,7 +16,7 @@ export interface CruiseData {
 
   altitude: number;
 
-  targetAltitude: number;
+  targetAltitude?: number;
 
   speed: number;
 
@@ -53,6 +53,7 @@ export function evaluateCruise(
    * Cruise altitude compliance
    */
   if (
+    data.targetAltitude !== undefined &&
     Math.abs(
       data.altitude - data.targetAltitude
     ) > 300

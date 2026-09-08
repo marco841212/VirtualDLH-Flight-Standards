@@ -117,7 +117,7 @@ export class FlightEvaluator {
             telemetry.altitude,
 
           targetAltitude:
-            telemetry.altitude,
+            telemetry.cruiseAltitude,
 
           speed:
             telemetry.groundSpeed
@@ -199,8 +199,7 @@ export class FlightEvaluator {
     const foqaData: FOQAData = {
 
       airspeed:
-        telemetry.indicatedAirspeed
-        ?? telemetry.groundSpeed,
+        telemetry.indicatedAirspeed,
 
       altitude:
         telemetry.altitude,
@@ -209,8 +208,10 @@ export class FlightEvaluator {
         telemetry.verticalSpeed,
 
       bankAngle:
-        telemetry.bankAngle
-        ?? 0,
+        telemetry.bankAngle,
+
+      overspeedWarning:
+        telemetry.overspeedWarning,
 
       landingRate:
         landingAnalysis

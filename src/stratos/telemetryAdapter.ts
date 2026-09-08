@@ -7,6 +7,8 @@ export interface StratosTelemetry {
 
   altitude_agl?: number;
 
+  cruise_altitude?: number;
+
   ground_speed?: number;
 
   indicated_airspeed?: number;
@@ -67,6 +69,10 @@ export class TelemetryAdapter {
 
       altitudeAgl:
         data.altitude_agl,
+
+
+      cruiseAltitude:
+        data.cruise_altitude,
 
 
       groundSpeed:

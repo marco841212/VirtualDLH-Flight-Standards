@@ -319,6 +319,9 @@ export class StratosSdkTelemetryBridge {
       altitude_agl:
         data.altitudeAgl,
 
+      cruise_altitude:
+        data.cruiseAltitude,
+
       ground_speed:
         data.groundSpeed,
 
