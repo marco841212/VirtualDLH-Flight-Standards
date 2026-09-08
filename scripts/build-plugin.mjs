@@ -1,12 +1,33 @@
 import {
+  existsSync
+} from "node:fs";
+
+import {
   spawnSync
 } from "node:child_process";
 
+import {
+  resolve
+} from "node:path";
 
-const npmCommand =
-  process.platform === "win32"
-    ? "npm.cmd"
-    : "npm";
+
+const viteCli =
+  resolve(
+    process.cwd(),
+    "node_modules",
+    "vite",
+    "bin",
+    "vite.js"
+  );
+
+
+if (!existsSync(viteCli)) {
+
+  throw new Error(
+    "Vite is not installed locally. Run npm install before building the Stratos plugin."
+  );
+
+}
 
 
 function runViteBuild(
@@ -27,11 +48,9 @@ function runViteBuild(
 
   const result =
     spawnSync(
-      npmCommand,
+      process.execPath,
       [
-        "exec",
-        "--",
-        "vite",
+        viteCli,
         "build"
       ],
       {
