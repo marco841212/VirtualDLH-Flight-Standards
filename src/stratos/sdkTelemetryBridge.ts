@@ -13,6 +13,10 @@ import {
   FlightTelemetryAccumulator
 } from "./flightTelemetryAccumulator.js";
 
+import {
+  FlightPhaseAnalyzer
+} from "./flightPhaseAnalyzer.js";
+
 
 export class StratosSdkTelemetryBridge {
 
@@ -27,6 +31,9 @@ export class StratosSdkTelemetryBridge {
 
   private accumulator:
     FlightTelemetryAccumulator;
+
+  private phaseAnalyzer:
+    FlightPhaseAnalyzer;
 
   private unsubscribeSimData:
     (() => void) | null = null;
@@ -44,6 +51,9 @@ export class StratosSdkTelemetryBridge {
 
     this.accumulator =
       new FlightTelemetryAccumulator();
+
+    this.phaseAnalyzer =
+      new FlightPhaseAnalyzer();
 
   }
 
@@ -158,6 +168,17 @@ export class StratosSdkTelemetryBridge {
 
     return this.accumulator
       .getSampleCount();
+
+  }
+
+
+  getPhaseStatistics() {
+
+    return this.phaseAnalyzer
+      .analyze(
+        this.accumulator
+          .getSamples()
+      );
 
   }
 
