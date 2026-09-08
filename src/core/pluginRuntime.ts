@@ -116,12 +116,18 @@ export class PluginRuntime {
         ?.getTelemetryHistory()
       ?? [];
 
+    const currentPhase =
+      this.stratosTelemetry
+        ?.getCurrentPhase()
+      ?? null;
+
     return this.standards.evaluateFlight(
       request,
       telemetry,
       landingAnalysis,
       phaseStatistics,
-      telemetryHistory
+      telemetryHistory,
+      currentPhase
     );
 
   }

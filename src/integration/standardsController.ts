@@ -1,4 +1,7 @@
-import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+import type {
+  FlightPhase as StratosFlightPhase,
+  LandingAnalysis
+} from "@skyvexsoftware/stratos-sdk";
 
 import { LiveMonitor } from "../stratos/liveMonitor.js";
 import { PilotReportGenerator } from "../reports/pilotReport.js";
@@ -56,7 +59,8 @@ export class StandardsController {
     telemetry?: StratosTelemetry,
     landingAnalysis?: LandingAnalysis,
     phaseStatistics: FlightPhaseStatistics[] = [],
-    telemetryHistory: FlightTelemetrySample[] = []
+    telemetryHistory: FlightTelemetrySample[] = [],
+    currentPhase: StratosFlightPhase | null = null
   ) {
 
     const result =
@@ -65,7 +69,8 @@ export class StandardsController {
         telemetry,
         landingAnalysis,
         phaseStatistics,
-        telemetryHistory
+        telemetryHistory,
+        currentPhase
       );
 
 

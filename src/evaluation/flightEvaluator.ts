@@ -50,7 +50,7 @@ import {
 
 export interface FlightEvaluation {
 
-  phase: FlightPhase;
+  phase: FlightPhase | StratosFlightPhase;
 
   score: number;
 
@@ -108,12 +108,14 @@ export class FlightEvaluator {
     telemetry: FlightTelemetry,
     landingAnalysis?: LandingAnalysis,
     phaseStatistics: FlightPhaseStatistics[] = [],
-    telemetryHistory: FlightTelemetrySample[] = []
+    telemetryHistory: FlightTelemetrySample[] = [],
+    currentPhase: StratosFlightPhase | null = null
   ): FlightEvaluation {
 
 
     const phase =
-      this.phaseDetector.detect(
+      currentPhase
+      ?? this.phaseDetector.detect(
         telemetry
       );
 

@@ -1,4 +1,7 @@
-import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+import type {
+  FlightPhase as StratosFlightPhase,
+  LandingAnalysis
+} from "@skyvexsoftware/stratos-sdk";
 
 import { FlightSync } from "./flightSync.js";
 
@@ -47,7 +50,8 @@ export class LiveMonitor {
     telemetry?: StratosTelemetry,
     landingAnalysis?: LandingAnalysis,
     phaseStatistics: FlightPhaseStatistics[] = [],
-    telemetryHistory: FlightTelemetrySample[] = []
+    telemetryHistory: FlightTelemetrySample[] = [],
+    currentPhase: StratosFlightPhase | null = null
   ): Promise<MonitorResult> {
 
     try {
@@ -58,7 +62,8 @@ export class LiveMonitor {
           telemetry,
           landingAnalysis,
           phaseStatistics,
-          telemetryHistory
+          telemetryHistory,
+          currentPhase
         );
 
 

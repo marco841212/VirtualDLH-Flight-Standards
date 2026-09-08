@@ -1,4 +1,7 @@
-import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+import type {
+  FlightPhase as StratosFlightPhase,
+  LandingAnalysis
+} from "@skyvexsoftware/stratos-sdk";
 
 import { FlightEvaluator } from "../evaluation/flightEvaluator.js";
 
@@ -41,7 +44,8 @@ export class FlightSync {
     telemetry?: StratosTelemetry,
     landingAnalysis?: LandingAnalysis,
     phaseStatistics: FlightPhaseStatistics[] = [],
-    telemetryHistory: FlightTelemetrySample[] = []
+    telemetryHistory: FlightTelemetrySample[] = [],
+    currentPhase: StratosFlightPhase | null = null
   ) {
 
     if (!telemetry) {
@@ -64,7 +68,8 @@ export class FlightSync {
         flightTelemetry,
         landingAnalysis,
         phaseStatistics,
-        telemetryHistory
+        telemetryHistory,
+        currentPhase
       );
 
 
