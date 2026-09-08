@@ -8,13 +8,21 @@ import type {
   StratosTelemetry
 } from "./telemetryAdapter.js";
 
+import {
+  FlightTelemetryAccumulator
+} from "./flightTelemetryAccumulator.js";
+
 
 export class StratosSdkTelemetryBridge {
 
-  private flight: PluginFlightAccessor;
+  private flight:
+    PluginFlightAccessor;
 
   private latestTelemetry:
     StratosTelemetry | null = null;
+
+  private accumulator:
+    FlightTelemetryAccumulator;
 
   private unsubscribe:
     (() => void) | null = null;
@@ -24,16 +32,17 @@ export class StratosSdkTelemetryBridge {
     flight: PluginFlightAccessor
   ) {
 
-    this.flight = flight;
+    this.flight =
+      flight;
+
+    this.accumulator =
+      new FlightTelemetryAccumulator();
 
   }
 
 
   async start() {
 
-    /*
-     * Hydrate from the current Stratos simulator snapshot first.
-     */
     const snapshot =
       await this.flight.getSnapshot();
 
@@ -46,9 +55,6 @@ export class StratosSdkTelemetryBridge {
     }
 
 
-    /*
-     * Subscribe to live simulator frames.
-     */
     this.unsubscribe =
       this.flight.onSimData(
         snapshot => {
@@ -69,7 +75,8 @@ export class StratosSdkTelemetryBridge {
 
       this.unsubscribe();
 
-      this.unsubscribe = null;
+      this.unsubscribe =
+        null;
 
     }
 
@@ -84,9 +91,34 @@ export class StratosSdkTelemetryBridge {
   }
 
 
+  getTelemetryHistory() {
+
+    return this.accumulator
+      .getSamples();
+
+  }
+
+
+  getTelemetrySampleCount() {
+
+    return this.accumulator
+      .getSampleCount();
+
+  }
+
+
+  clearTelemetryHistory() {
+
+    this.accumulator.clear();
+
+  }
+
+
   hasLiveTelemetry() {
 
-    return this.latestTelemetry !== null;
+    return (
+      this.latestTelemetry !== null
+    );
 
   }
 
@@ -105,10 +137,19 @@ export class StratosSdkTelemetryBridge {
     }
 
 
-    this.latestTelemetry =
+    const telemetry =
       this.convertFlightData(
         snapshot.data
       );
+
+
+    this.latestTelemetry =
+      telemetry;
+
+
+    this.accumulator.record(
+      telemetry
+    );
 
   }
 
