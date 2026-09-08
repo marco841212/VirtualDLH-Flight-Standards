@@ -106,10 +106,16 @@ export class PluginRuntime {
         ?.getLandingAnalysis()
       ?? undefined;
 
+    const phaseStatistics =
+      this.stratosTelemetry
+        ?.getPhaseStatistics()
+      ?? [];
+
     return this.standards.evaluateFlight(
       request,
       telemetry,
-      landingAnalysis
+      landingAnalysis,
+      phaseStatistics
     );
 
   }

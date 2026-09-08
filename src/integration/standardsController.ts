@@ -7,6 +7,10 @@ import type {
   StratosTelemetry
 } from "../stratos/telemetryAdapter.js";
 
+import type {
+  FlightPhaseStatistics
+} from "../stratos/flightPhaseAnalyzer.js";
+
 
 export interface StandardsFlightRequest {
 
@@ -46,7 +50,8 @@ export class StandardsController {
   async evaluateFlight(
     request: StandardsFlightRequest,
     telemetry?: StratosTelemetry,
-    landingAnalysis?: LandingAnalysis
+    landingAnalysis?: LandingAnalysis,
+    phaseStatistics: FlightPhaseStatistics[] = []
   ) {
 
     const result =
@@ -73,6 +78,21 @@ export class StandardsController {
 
     const evaluation =
       result.evaluation as any;
+
+
+    const phaseReport =
+      Object.fromEntries(
+        phaseStatistics.map(
+          item => [item.phase, item]
+        )
+      );
+
+
+    const enrichedEvaluation = {
+      ...evaluation,
+      phaseStatistics,
+      phaseScores: phaseReport
+    };
 
 
     const report =
@@ -107,8 +127,7 @@ export class StandardsController {
           ?? false,
 
         sopPhases:
-          evaluation.phaseScores
-          ?? {},
+          phaseReport,
 
         exceedances:
           evaluation.exceedances
@@ -128,7 +147,8 @@ export class StandardsController {
       flightId:
         request.flightId,
 
-      evaluation,
+      evaluation:
+        enrichedEvaluation,
 
       report
 
