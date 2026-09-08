@@ -24,9 +24,22 @@ const cruiseTelemetry: FlightTelemetry = {
 };
 
 
+function resolvePhase(
+  currentPhase: StratosFlightPhase | null,
+  telemetry: FlightTelemetry
+): FlightPhase | StratosFlightPhase {
+
+  return currentPhase
+    ?? detector.detect(
+      telemetry
+    );
+
+}
+
+
 const fallbackPhase =
-  null
-  ?? detector.detect(
+  resolvePhase(
+    null,
     cruiseTelemetry
   );
 
@@ -43,8 +56,8 @@ const authoritativePhase =
 
 
 const resolvedPhase =
-  authoritativePhase
-  ?? detector.detect(
+  resolvePhase(
+    authoritativePhase,
     cruiseTelemetry
   );
 
