@@ -1,6 +1,7 @@
 import type {
   FlightData,
   FlightPhase,
+  LandingAnalysis,
   PluginFlightAccessor,
   SimDataSnapshot
 } from "@skyvexsoftware/stratos-sdk";
@@ -29,6 +30,9 @@ export class StratosSdkTelemetryBridge {
   private currentPhase:
     FlightPhase | null = null;
 
+  private latestLandingAnalysis:
+    LandingAnalysis | null = null;
+
   private accumulator:
     FlightTelemetryAccumulator;
 
@@ -39,6 +43,9 @@ export class StratosSdkTelemetryBridge {
     (() => void) | null = null;
 
   private unsubscribePhase:
+    (() => void) | null = null;
+
+  private unsubscribeLanding:
     (() => void) | null = null;
 
 
@@ -70,6 +77,13 @@ export class StratosSdkTelemetryBridge {
       phaseSnapshot.currentPhase;
 
 
+    const landingSnapshot =
+      await this.flight.getLandingReport();
+
+    this.latestLandingAnalysis =
+      landingSnapshot.landingAnalysis;
+
+
     /*
      * Subscribe to future Stratos phase changes.
      */
@@ -79,6 +93,21 @@ export class StratosSdkTelemetryBridge {
 
           this.currentPhase =
             payload.currentPhase;
+
+        }
+      );
+
+
+    this.unsubscribeLanding =
+      this.flight.onLanding(
+        payload => {
+
+          if (payload.landingAnalysis) {
+
+            this.latestLandingAnalysis =
+              payload.landingAnalysis;
+
+          }
 
         }
       );
@@ -137,6 +166,16 @@ export class StratosSdkTelemetryBridge {
 
     }
 
+
+    if (this.unsubscribeLanding) {
+
+      this.unsubscribeLanding();
+
+      this.unsubscribeLanding =
+        null;
+
+    }
+
   }
 
 
@@ -152,6 +191,23 @@ export class StratosSdkTelemetryBridge {
     FlightPhase | null {
 
     return this.currentPhase;
+
+  }
+
+
+  getLandingAnalysis():
+    LandingAnalysis | null {
+
+    return this.latestLandingAnalysis;
+
+  }
+
+
+  hasLandingAnalysis() {
+
+    return (
+      this.latestLandingAnalysis !== null
+    );
 
   }
 
@@ -198,6 +254,14 @@ export class StratosSdkTelemetryBridge {
   clearTelemetryHistory() {
 
     this.accumulator.clear();
+
+  }
+
+
+  clearLandingAnalysis() {
+
+    this.latestLandingAnalysis =
+      null;
 
   }
 
