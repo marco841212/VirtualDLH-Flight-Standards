@@ -101,9 +101,15 @@ export class PluginRuntime {
         ?.getLatestTelemetry()
       ?? undefined;
 
+    const landingAnalysis =
+      this.stratosTelemetry
+        ?.getLandingAnalysis()
+      ?? undefined;
+
     return this.standards.evaluateFlight(
       request,
-      telemetry
+      telemetry,
+      landingAnalysis
     );
 
   }

@@ -9,7 +9,7 @@ export interface LandingEvaluation {
 export interface LandingData {
   touchdownRate: number;
   touchdownDistance: number;
-  runwayLength: number;
+  runwayLength?: number;
   centerlineDeviation?: number;
   reverseThrustUsed?: boolean;
   brakingIssue?: boolean;
@@ -47,6 +47,7 @@ export function evaluateLanding(
 
 
   if (
+    data.runwayLength !== undefined &&
     data.touchdownDistance >
     data.runwayLength * 0.35
   ) {
@@ -74,7 +75,7 @@ export function evaluateLanding(
   }
 
 
-  if (!data.reverseThrustUsed) {
+  if (data.reverseThrustUsed === false) {
 
     notes.push(
       "Reverse thrust not detected"

@@ -1,3 +1,5 @@
+import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+
 import { LiveMonitor } from "../stratos/liveMonitor.js";
 import { PilotReportGenerator } from "../reports/pilotReport.js";
 
@@ -43,13 +45,15 @@ export class StandardsController {
 
   async evaluateFlight(
     request: StandardsFlightRequest,
-    telemetry?: StratosTelemetry
+    telemetry?: StratosTelemetry,
+    landingAnalysis?: LandingAnalysis
   ) {
 
     const result =
       await this.liveMonitor.monitorFlight(
         request.flightId,
-        telemetry
+        telemetry,
+        landingAnalysis
       );
 
 

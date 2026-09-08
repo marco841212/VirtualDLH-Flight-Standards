@@ -16,9 +16,9 @@ export interface FlightGradeInput {
 
   cruiseScore: number;
 
-  approachScore: number;
+  approachScore?: number;
 
-  landingScore: number;
+  landingScore?: number;
 
   foqaScore: number;
 
@@ -31,21 +31,65 @@ export function calculateFlightGrade(
 ): FlightGradeResult {
 
 
-  const finalScore =
-    Math.round(
+  const components: {
+    score: number;
+    weight: number;
+  }[] = [
+    {
+      score: data.cruiseScore,
+      weight: 0.25
+    },
+    {
+      score: data.foqaScore,
+      weight: 0.25
+    }
+  ];
 
-      (
-        data.cruiseScore * 0.25
-        +
-        data.approachScore * 0.25
-        +
-        data.landingScore * 0.25
-        +
-        data.foqaScore * 0.25
 
-      )
+  if (data.approachScore !== undefined) {
 
+    components.push({
+      score: data.approachScore,
+      weight: 0.25
+    });
+
+  }
+
+
+  if (data.landingScore !== undefined) {
+
+    components.push({
+      score: data.landingScore,
+      weight: 0.25
+    });
+
+  }
+
+
+  const totalWeight =
+    components.reduce(
+      (total, item) =>
+        total + item.weight,
+      0
     );
+
+
+  const weightedScore =
+    components.reduce(
+      (total, item) =>
+        total +
+        item.score * item.weight,
+      0
+    );
+
+
+  const finalScore =
+    totalWeight > 0
+      ? Math.round(
+          weightedScore /
+          totalWeight
+        )
+      : 0;
 
 
 

@@ -1,3 +1,5 @@
+import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+
 import { FlightSync } from "./flightSync.js";
 
 import type {
@@ -34,7 +36,8 @@ export class LiveMonitor {
 
   async monitorFlight(
     flightId: string,
-    telemetry?: StratosTelemetry
+    telemetry?: StratosTelemetry,
+    landingAnalysis?: LandingAnalysis
   ): Promise<MonitorResult> {
 
     try {
@@ -42,7 +45,8 @@ export class LiveMonitor {
       const result =
         await this.flightSync.processFlight(
           flightId,
-          telemetry
+          telemetry,
+          landingAnalysis
         );
 
 

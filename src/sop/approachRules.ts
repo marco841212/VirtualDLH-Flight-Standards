@@ -18,7 +18,7 @@ export interface ApproachData {
 
   airspeed: number;
 
-  targetSpeed: number;
+  targetSpeed?: number;
 
   verticalSpeed: number;
 
@@ -72,6 +72,7 @@ export function evaluateApproach(
    * Approach Speed Control
    */
   if (
+    data.targetSpeed !== undefined &&
     Math.abs(
       data.airspeed - data.targetSpeed
     ) > 10

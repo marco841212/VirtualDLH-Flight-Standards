@@ -1,3 +1,5 @@
+import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+
 import {
   PhaseDetector,
   FlightTelemetry,
@@ -51,9 +53,9 @@ export interface FlightEvaluation {
 
   cruiseScore: number;
 
-  approachScore: number;
+  approachScore: number | null;
 
-  landingScore: number;
+  landingScore: number | null;
 
   foqaScore: number;
 
@@ -94,7 +96,8 @@ export class FlightEvaluator {
 
 
   evaluate(
-    telemetry: FlightTelemetry
+    telemetry: FlightTelemetry,
+    landingAnalysis?: LandingAnalysis
   ): FlightEvaluation {
 
 
@@ -125,78 +128,79 @@ export class FlightEvaluator {
 
 
 
-    const approachData: ApproachData = {
-
-      altitude:
-        telemetry.altitude,
-
-      airspeed:
-        telemetry.groundSpeed,
-
-      targetSpeed:
-        140,
-
-      verticalSpeed:
-        telemetry.verticalSpeed,
-
-      gearDown:
-        true,
-
-      flapsConfigured:
-        true,
-
-      unstableApproach:
-        false
-
-    };
-
-
-
     const approachResult =
-      evaluateApproach(
-        approachData
-      );
+      landingAnalysis
+        ? evaluateApproach({
+
+            altitude:
+              landingAnalysis.gateCapture
+                ?.altitudeAgl
+              ?? landingAnalysis.approachAltitude,
+
+            airspeed:
+              landingAnalysis.gateCapture
+                ?.indicatedAirspeed
+              ?? landingAnalysis.approachIas,
+
+            verticalSpeed:
+              landingAnalysis.gateCapture
+                ?.verticalSpeed
+              ?? landingAnalysis.approachVs,
+
+            gearDown:
+              telemetry.gearDown,
+
+            flapsConfigured:
+              landingAnalysis.touchdownFlapsIndex
+                !== null
+                ? landingAnalysis.touchdownFlapsIndex > 0
+                : telemetry.flapsExtended
+
+          })
+        : null;
 
 
 
-    const landingData: LandingData = {
-
-      touchdownRate:
-        -150,
-
-      touchdownDistance:
-        900,
-
-      runwayLength:
-        3000,
-
-      centerlineDeviation:
-        2,
-
-      reverseThrustUsed:
-        true,
-
-      brakingIssue:
-        false,
-
-      bouncedLanding:
-        false
-
-    };
-
+    const reverseThrustKnown =
+      telemetry.reverser1Deployed
+        !== undefined ||
+      telemetry.reverser2Deployed
+        !== undefined;
 
 
     const landingResult =
-      evaluateLanding(
-        landingData
-      );
+      landingAnalysis
+        ? evaluateLanding({
+
+            touchdownRate:
+              landingAnalysis.landingRateFpm,
+
+            touchdownDistance:
+              landingAnalysis.landingDistanceFt,
+
+            reverseThrustUsed:
+              reverseThrustKnown
+                ? (
+                    telemetry.reverser1Deployed
+                      === true ||
+                    telemetry.reverser2Deployed
+                      === true
+                  )
+                : undefined,
+
+            bouncedLanding:
+              landingAnalysis.bounceCount > 0
+
+          })
+        : null;
 
 
 
     const foqaData: FOQAData = {
 
       airspeed:
-        telemetry.groundSpeed,
+        telemetry.indicatedAirspeed
+        ?? telemetry.groundSpeed,
 
       altitude:
         telemetry.altitude,
@@ -205,10 +209,32 @@ export class FlightEvaluator {
         telemetry.verticalSpeed,
 
       bankAngle:
-        0,
+        telemetry.bankAngle
+        ?? 0,
+
+      landingRate:
+        landingAnalysis
+          ?.landingRateFpm
+        ?? telemetry.landingRate,
+
+      taxiSpeed:
+        telemetry.onGround
+          ? telemetry.groundSpeed
+          : undefined,
 
       approachStable:
-        true
+        landingAnalysis?.gateCapture
+          ? (
+              landingAnalysis
+                .gateCapture
+                .verticalSpeed >= -1200 &&
+              Math.abs(
+                landingAnalysis
+                  .gateCapture
+                  .bank
+              ) <= 35
+            )
+          : undefined
 
     };
 
@@ -241,10 +267,10 @@ export class FlightEvaluator {
           sopResult.overallScore,
 
         approachScore:
-          approachResult.score,
+          approachResult?.score,
 
         landingScore:
-          landingResult.score,
+          landingResult?.score,
 
         foqaScore:
           foqaResult.finalScore
@@ -275,11 +301,13 @@ export class FlightEvaluator {
 
 
       approachScore:
-        approachResult.score,
+        approachResult?.score
+        ?? null,
 
 
       landingScore:
-        landingResult.score,
+        landingResult?.score
+        ?? null,
 
 
       foqaScore:
@@ -290,9 +318,11 @@ export class FlightEvaluator {
 
         ...sopResult.violations,
 
-        ...approachResult.violations,
+        ...(approachResult
+          ?.violations ?? []),
 
-        ...landingResult.violations
+        ...(landingResult
+          ?.violations ?? [])
 
       ],
 
@@ -301,9 +331,11 @@ export class FlightEvaluator {
 
         ...sopResult.notes,
 
-        ...approachResult.notes,
+        ...(approachResult
+          ?.notes ?? []),
 
-        ...landingResult.notes
+        ...(landingResult
+          ?.notes ?? [])
 
       ],
 

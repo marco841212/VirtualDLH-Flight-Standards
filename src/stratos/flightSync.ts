@@ -1,3 +1,5 @@
+import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+
 import { FlightEvaluator } from "../evaluation/flightEvaluator.js";
 
 import {
@@ -28,7 +30,8 @@ export class FlightSync {
 
   async processFlight(
     flightId: string,
-    telemetry?: StratosTelemetry
+    telemetry?: StratosTelemetry,
+    landingAnalysis?: LandingAnalysis
   ) {
 
     if (!telemetry) {
@@ -48,7 +51,8 @@ export class FlightSync {
 
     const evaluation =
       this.evaluator.evaluate(
-        flightTelemetry
+        flightTelemetry,
+        landingAnalysis
       );
 
 
