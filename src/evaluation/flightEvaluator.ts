@@ -5,6 +5,10 @@ import type {
   FlightPhaseStatistics
 } from "../stratos/flightPhaseAnalyzer.js";
 
+import type {
+  FlightTelemetrySample
+} from "../stratos/flightTelemetryAccumulator.js";
+
 import {
   PhaseDetector,
   FlightTelemetry,
@@ -103,7 +107,8 @@ export class FlightEvaluator {
   evaluate(
     telemetry: FlightTelemetry,
     landingAnalysis?: LandingAnalysis,
-    phaseStatistics: FlightPhaseStatistics[] = []
+    phaseStatistics: FlightPhaseStatistics[] = [],
+    telemetryHistory: FlightTelemetrySample[] = []
   ): FlightEvaluation {
 
 
@@ -229,7 +234,44 @@ export class FlightEvaluator {
 
 
 
-    const foqaData: FOQAData = {
+    const historyEvents =
+      telemetryHistory.flatMap(
+        sample => {
+
+          const sampleData: FOQAData = {
+
+            airspeed:
+              sample.telemetry.indicated_airspeed,
+
+            altitude:
+              sample.telemetry.altitude ?? 0,
+
+            verticalSpeed:
+              sample.telemetry.vertical_speed ?? 0,
+
+            bankAngle:
+              sample.telemetry.bank_angle,
+
+            overspeedWarning:
+              sample.telemetry.overspeed_warning,
+
+            taxiSpeed:
+              sample.phase === StratosFlightPhase.TAXI ||
+              sample.phase === StratosFlightPhase.TAXI_IN
+                ? sample.telemetry.ground_speed
+                : undefined
+
+          };
+
+          return this.foqaEvents.detect(
+            sampleData
+          );
+
+        }
+      );
+
+
+    const summaryData: FOQAData = {
 
       airspeed:
         telemetry.indicatedAirspeed,
@@ -251,11 +293,6 @@ export class FlightEvaluator {
           ?.landingRateFpm
         ?? telemetry.landingRate,
 
-      taxiSpeed:
-        telemetry.onGround
-          ? telemetry.groundSpeed
-          : undefined,
-
       approachStable:
         landingAnalysis?.gateCapture
           ? (
@@ -273,10 +310,25 @@ export class FlightEvaluator {
     };
 
 
+    const summaryEvents =
+      this.foqaEvents.detect(
+        summaryData
+      );
+
 
     const events =
-      this.foqaEvents.detect(
-        foqaData
+      Array.from(
+        new Map(
+          [
+            ...summaryEvents,
+            ...historyEvents
+          ].map(
+            event => [
+              event.type,
+              event
+            ]
+          )
+        ).values()
       );
 
 

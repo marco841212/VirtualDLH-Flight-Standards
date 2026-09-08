@@ -11,6 +11,10 @@ import type {
   FlightPhaseStatistics
 } from "../stratos/flightPhaseAnalyzer.js";
 
+import type {
+  FlightTelemetrySample
+} from "../stratos/flightTelemetryAccumulator.js";
+
 
 export interface StandardsFlightRequest {
 
@@ -51,7 +55,8 @@ export class StandardsController {
     request: StandardsFlightRequest,
     telemetry?: StratosTelemetry,
     landingAnalysis?: LandingAnalysis,
-    phaseStatistics: FlightPhaseStatistics[] = []
+    phaseStatistics: FlightPhaseStatistics[] = [],
+    telemetryHistory: FlightTelemetrySample[] = []
   ) {
 
     const result =
@@ -59,7 +64,8 @@ export class StandardsController {
         request.flightId,
         telemetry,
         landingAnalysis,
-        phaseStatistics
+        phaseStatistics,
+        telemetryHistory
       );
 
 

@@ -111,11 +111,17 @@ export class PluginRuntime {
         ?.getPhaseStatistics()
       ?? [];
 
+    const telemetryHistory =
+      this.stratosTelemetry
+        ?.getTelemetryHistory()
+      ?? [];
+
     return this.standards.evaluateFlight(
       request,
       telemetry,
       landingAnalysis,
-      phaseStatistics
+      phaseStatistics,
+      telemetryHistory
     );
 
   }

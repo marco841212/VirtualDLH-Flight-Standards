@@ -11,6 +11,10 @@ import type {
   FlightPhaseStatistics
 } from "./flightPhaseAnalyzer.js";
 
+import type {
+  FlightTelemetrySample
+} from "./flightTelemetryAccumulator.js";
+
 
 export class FlightSync {
 
@@ -36,7 +40,8 @@ export class FlightSync {
     flightId: string,
     telemetry?: StratosTelemetry,
     landingAnalysis?: LandingAnalysis,
-    phaseStatistics: FlightPhaseStatistics[] = []
+    phaseStatistics: FlightPhaseStatistics[] = [],
+    telemetryHistory: FlightTelemetrySample[] = []
   ) {
 
     if (!telemetry) {
@@ -58,7 +63,8 @@ export class FlightSync {
       this.evaluator.evaluate(
         flightTelemetry,
         landingAnalysis,
-        phaseStatistics
+        phaseStatistics,
+        telemetryHistory
       );
 
 

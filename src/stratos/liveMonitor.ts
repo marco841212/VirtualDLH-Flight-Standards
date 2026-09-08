@@ -10,6 +10,10 @@ import type {
   FlightPhaseStatistics
 } from "./flightPhaseAnalyzer.js";
 
+import type {
+  FlightTelemetrySample
+} from "./flightTelemetryAccumulator.js";
+
 
 export interface MonitorResult {
 
@@ -42,7 +46,8 @@ export class LiveMonitor {
     flightId: string,
     telemetry?: StratosTelemetry,
     landingAnalysis?: LandingAnalysis,
-    phaseStatistics: FlightPhaseStatistics[] = []
+    phaseStatistics: FlightPhaseStatistics[] = [],
+    telemetryHistory: FlightTelemetrySample[] = []
   ): Promise<MonitorResult> {
 
     try {
@@ -52,7 +57,8 @@ export class LiveMonitor {
           flightId,
           telemetry,
           landingAnalysis,
-          phaseStatistics
+          phaseStatistics,
+          telemetryHistory
         );
 
 
