@@ -72,6 +72,13 @@ export class PhaseDetector {
   ): FlightPhase {
 
 
+    const landingEvidence =
+      data.landingRate !== undefined ||
+      data.landingDistance !== undefined ||
+      data.reverser1Deployed === true ||
+      data.reverser2Deployed === true;
+
+
     /*
      * Aircraft stationary
      */
@@ -86,10 +93,26 @@ export class PhaseDetector {
 
 
     /*
-     * Taxi operations
+     * Taxi in after touchdown
      */
     if (
       data.onGround &&
+      landingEvidence &&
+      data.groundSpeed >= 5 &&
+      data.groundSpeed < 40
+    ) {
+
+      return FlightPhase.TAXI_IN;
+
+    }
+
+
+    /*
+     * Taxi out before takeoff
+     */
+    if (
+      data.onGround &&
+      !landingEvidence &&
       data.groundSpeed >= 5 &&
       data.groundSpeed < 40
     ) {
@@ -100,10 +123,25 @@ export class PhaseDetector {
 
 
     /*
+     * Landing rollout
+     */
+    if (
+      data.onGround &&
+      landingEvidence &&
+      data.groundSpeed >= 40
+    ) {
+
+      return FlightPhase.LANDING;
+
+    }
+
+
+    /*
      * Takeoff roll
      */
     if (
       data.onGround &&
+      !landingEvidence &&
       data.groundSpeed >= 40
     ) {
 
@@ -174,20 +212,6 @@ export class PhaseDetector {
     ) {
 
       return FlightPhase.APPROACH;
-
-    }
-
-
-    /*
-     * Landing
-     */
-    if (
-      data.onGround &&
-      data.groundSpeed < 80 &&
-      data.gearDown === true
-    ) {
-
-      return FlightPhase.LANDING;
 
     }
 
