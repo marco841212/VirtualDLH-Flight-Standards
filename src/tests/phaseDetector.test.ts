@@ -40,12 +40,40 @@ const cases: PhaseCase[] = [
     expected: FlightPhase.TAXI_OUT
   },
   {
+    name: "taxi out ignores zero landing placeholders",
+    telemetry: {
+      altitude: 0,
+      groundSpeed: 20,
+      verticalSpeed: 0,
+      onGround: true,
+      landingRate: 0,
+      landingDistance: 0,
+      reverser1Deployed: false,
+      reverser2Deployed: false
+    },
+    expected: FlightPhase.TAXI_OUT
+  },
+  {
     name: "takeoff roll",
     telemetry: {
       altitude: 0,
       groundSpeed: 90,
       verticalSpeed: 0,
       onGround: true
+    },
+    expected: FlightPhase.TAKEOFF_ROLL
+  },
+  {
+    name: "takeoff roll ignores zero landing placeholders",
+    telemetry: {
+      altitude: 0,
+      groundSpeed: 90,
+      verticalSpeed: 0,
+      onGround: true,
+      landingRate: 0,
+      landingDistance: 0,
+      reverser1Deployed: false,
+      reverser2Deployed: false
     },
     expected: FlightPhase.TAKEOFF_ROLL
   },

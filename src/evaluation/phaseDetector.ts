@@ -72,9 +72,21 @@ export class PhaseDetector {
   ): FlightPhase {
 
 
+    const landingRateEvidence =
+      data.landingRate !== undefined &&
+      Number.isFinite(data.landingRate) &&
+      data.landingRate !== 0;
+
+
+    const landingDistanceEvidence =
+      data.landingDistance !== undefined &&
+      Number.isFinite(data.landingDistance) &&
+      data.landingDistance > 0;
+
+
     const landingEvidence =
-      data.landingRate !== undefined ||
-      data.landingDistance !== undefined ||
+      landingRateEvidence ||
+      landingDistanceEvidence ||
       data.reverser1Deployed === true ||
       data.reverser2Deployed === true;
 
