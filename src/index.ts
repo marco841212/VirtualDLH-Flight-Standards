@@ -1,87 +1,45 @@
-import { CockpitTracker } from "./cockpit/tracker.js";
-import { ScoringEngine } from "./scoring/scoringEngine.js";
-import { VirtualDLHStratosRuntime } from "./stratos/runtime.js";
+import {
+  createPlugin
+} from "@skyvexsoftware/stratos-sdk";
+
+import {
+  PluginRuntime
+} from "./core/pluginRuntime.js";
 
 
-export class VirtualDLHFlightStandards {
+export const runtime =
+  new PluginRuntime();
 
 
-    private cockpit: CockpitTracker;
+export default createPlugin({
 
-    private scoring: ScoringEngine;
+  async onStart(ctx) {
 
-    private stratos: VirtualDLHStratosRuntime;
-
-
-
-    constructor() {
-
-        this.cockpit =
-            new CockpitTracker();
-
-
-        this.scoring =
-            new ScoringEngine();
-
-
-        this.stratos =
-            new VirtualDLHStratosRuntime({});
-
-    }
-
-
-
-    async start() {
-
-        await this.stratos.start();
-
-
-        console.log(
-            "VirtualDLH Flight Standards Started"
-        );
-
-    }
-
-
-
-    async stop() {
-
-        await this.stratos.stop();
-
-
-        console.log(
-            "VirtualDLH Flight Standards Stopped"
-        );
-
-    }
-
-
-processEvent(
-    event: string,
-    data: any
-) {
-
-    this.stratos.handleEvent(
-        event,
-        data
+    ctx.logger.info(
+      "VirtualDLH Flight Standards",
+      "Starting live Stratos telemetry connection"
     );
 
+    await runtime.connectStratosFlight(
+      ctx.flight
+    );
 
-    this.cockpit.check();
+    ctx.logger.info(
+      "VirtualDLH Flight Standards",
+      "Live Stratos telemetry connected"
+    );
 
-}
-    
+  },
 
+  async onStop(ctx) {
 
+    runtime.disconnectStratosFlight();
 
-    getFlightScore() {
+    ctx.logger.info(
+      "VirtualDLH Flight Standards",
+      "Stratos telemetry disconnected"
+    );
 
-        return this.scoring.getScore();
+  }
 
-    }
-
-}
-
-
-
-export default VirtualDLHFlightStandards;
+});
