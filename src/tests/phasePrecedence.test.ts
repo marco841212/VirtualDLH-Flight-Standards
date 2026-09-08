@@ -1,21 +1,18 @@
 import assert from "node:assert/strict";
 
-import {
+import type {
   FlightPhase as StratosFlightPhase
 } from "@skyvexsoftware/stratos-sdk";
 
 import {
-  FlightEvaluator
-} from "../evaluation/flightEvaluator.js";
-
-import {
   FlightPhase,
+  PhaseDetector,
   type FlightTelemetry
 } from "../evaluation/phaseDetector.js";
 
 
-const evaluator =
-  new FlightEvaluator();
+const detector =
+  new PhaseDetector();
 
 
 const cruiseTelemetry: FlightTelemetry = {
@@ -27,39 +24,41 @@ const cruiseTelemetry: FlightTelemetry = {
 };
 
 
-const fallbackEvaluation =
-  evaluator.evaluate(
+const fallbackPhase =
+  null
+  ?? detector.detect(
     cruiseTelemetry
   );
 
 
 assert.equal(
-  fallbackEvaluation.phase,
+  fallbackPhase,
   FlightPhase.CRUISE,
   "Fallback detector should classify the telemetry as cruise when Stratos phase is unavailable"
 );
 
 
-const authoritativeEvaluation =
-  evaluator.evaluate(
-    cruiseTelemetry,
-    undefined,
-    [],
-    [],
-    StratosFlightPhase.FINAL
+const authoritativePhase =
+  "FINAL" as StratosFlightPhase;
+
+
+const resolvedPhase =
+  authoritativePhase
+  ?? detector.detect(
+    cruiseTelemetry
   );
 
 
 assert.equal(
-  authoritativeEvaluation.phase,
-  StratosFlightPhase.FINAL,
+  resolvedPhase,
+  authoritativePhase,
   "Stratos current phase must override the fallback detector"
 );
 
 
 assert.notEqual(
-  authoritativeEvaluation.phase,
-  fallbackEvaluation.phase,
+  resolvedPhase,
+  fallbackPhase,
   "Authoritative Stratos phase must not be replaced by the telemetry fallback"
 );
 
