@@ -1,10 +1,28 @@
-import {
+import type {
   FlightPhase
 } from "@skyvexsoftware/stratos-sdk";
 
 import type {
   FlightTelemetrySample
 } from "./flightTelemetryAccumulator.js";
+
+
+const STRATOS_PHASE = {
+  TAXI: "TAXI",
+  TAXI_IN: "TAXI_IN",
+  APPROACH: "APPROACH",
+  FINAL: "FINAL"
+} as const;
+
+
+function isStratosPhase(
+  phase: FlightPhase,
+  expected: string
+) {
+
+  return String(phase) === expected;
+
+}
 
 
 export interface FlightPhaseStatistics {
@@ -219,8 +237,14 @@ export class FlightPhaseAnalyzer {
      * taxi speed greater than 30 knots.
      */
     if (
-      phase === FlightPhase.TAXI ||
-      phase === FlightPhase.TAXI_IN
+      isStratosPhase(
+        phase,
+        STRATOS_PHASE.TAXI
+      ) ||
+      isStratosPhase(
+        phase,
+        STRATOS_PHASE.TAXI_IN
+      )
     ) {
 
       const highSpeedTaxi =
@@ -249,8 +273,14 @@ export class FlightPhaseAnalyzer {
      * descent rate below -1200 fpm.
      */
     if (
-      phase === FlightPhase.APPROACH ||
-      phase === FlightPhase.FINAL
+      isStratosPhase(
+        phase,
+        STRATOS_PHASE.APPROACH
+      ) ||
+      isStratosPhase(
+        phase,
+        STRATOS_PHASE.FINAL
+      )
     ) {
 
       const excessiveSinkRate =
@@ -279,7 +309,10 @@ export class FlightPhaseAnalyzer {
      * Gear and flaps should be configured here.
      */
     if (
-      phase === FlightPhase.FINAL
+      isStratosPhase(
+        phase,
+        STRATOS_PHASE.FINAL
+      )
     ) {
 
       const gearNotConfigured =
