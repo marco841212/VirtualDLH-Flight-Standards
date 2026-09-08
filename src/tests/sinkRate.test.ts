@@ -1,4 +1,9 @@
-import { FOQAEvents } from "../foqa/events.js";
+import assert from "node:assert/strict";
+
+import {
+  FOQAEvents,
+  FOQAEventType
+} from "../foqa/events.js";
 import { ExceedanceEngine } from "../foqa/exceedance.js";
 import { FOQAScoringEngine } from "../foqa/scoring.js";
 
@@ -15,7 +20,6 @@ const scoring =
   new FOQAScoringEngine();
 
 
-
 const events =
   foqa.detect({
 
@@ -23,14 +27,22 @@ const events =
 
     altitude: 1200,
 
-    verticalSpeed: -2200,
+    verticalSpeed: -2600,
 
     bankAngle: 5,
 
-    approachStable: false
+    approachStable: true
 
   });
 
+
+assert.equal(
+  events.some(
+    event => event.type === FOQAEventType.EXCESSIVE_SINK_RATE
+  ),
+  true,
+  "Sink rate below -2500 fpm should produce an EXCESSIVE_SINK_RATE FOQA event"
+);
 
 
 const findings =
@@ -44,6 +56,15 @@ const result =
     100,
     findings
   );
+
+
+assert.equal(
+  findings.some(
+    finding => finding.event === FOQAEventType.EXCESSIVE_SINK_RATE
+  ),
+  true,
+  "EXCESSIVE_SINK_RATE FOQA event should produce an exceedance"
+);
 
 
 console.log(
