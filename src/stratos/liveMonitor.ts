@@ -1,5 +1,9 @@
 import { FlightSync } from "./flightSync.js";
 
+import type {
+  StratosTelemetry
+} from "./telemetryAdapter.js";
+
 
 export interface MonitorResult {
 
@@ -14,32 +18,31 @@ export interface MonitorResult {
 }
 
 
-
 export class LiveMonitor {
 
-
-  private flightSync: FlightSync;
-
+  private flightSync:
+    FlightSync;
 
 
   constructor() {
 
-    this.flightSync = new FlightSync();
+    this.flightSync =
+      new FlightSync();
 
   }
 
 
-
   async monitorFlight(
-    flightId: string
+    flightId: string,
+    telemetry?: StratosTelemetry
   ): Promise<MonitorResult> {
-
 
     try {
 
       const result =
         await this.flightSync.processFlight(
-          flightId
+          flightId,
+          telemetry
         );
 
 
@@ -57,7 +60,6 @@ export class LiveMonitor {
 
     } catch (error) {
 
-
       return {
 
         success: false,
@@ -74,6 +76,5 @@ export class LiveMonitor {
     }
 
   }
-
 
 }

@@ -1,6 +1,10 @@
 import { LiveMonitor } from "../stratos/liveMonitor.js";
 import { PilotReportGenerator } from "../reports/pilotReport.js";
 
+import type {
+  StratosTelemetry
+} from "../stratos/telemetryAdapter.js";
+
 
 export interface StandardsFlightRequest {
 
@@ -17,19 +21,19 @@ export interface StandardsFlightRequest {
 }
 
 
-
 export class StandardsController {
 
+  private liveMonitor:
+    LiveMonitor;
 
-  private liveMonitor: LiveMonitor;
-
-  private reportGenerator: PilotReportGenerator;
-
+  private reportGenerator:
+    PilotReportGenerator;
 
 
   constructor() {
 
-    this.liveMonitor = new LiveMonitor();
+    this.liveMonitor =
+      new LiveMonitor();
 
     this.reportGenerator =
       new PilotReportGenerator();
@@ -37,17 +41,16 @@ export class StandardsController {
   }
 
 
-
   async evaluateFlight(
-    request: StandardsFlightRequest
+    request: StandardsFlightRequest,
+    telemetry?: StratosTelemetry
   ) {
-
 
     const result =
       await this.liveMonitor.monitorFlight(
-        request.flightId
+        request.flightId,
+        telemetry
       );
-
 
 
     if (!result.success) {
@@ -56,54 +59,62 @@ export class StandardsController {
 
         success: false,
 
-        error: result.error
+        error:
+          result.error
 
       };
 
     }
 
 
-
     const evaluation =
       result.evaluation as any;
-
 
 
     const report =
       this.reportGenerator.generate({
 
         pilot:
-          request.pilotName ?? "Unknown Pilot",
+          request.pilotName
+          ?? "Unknown Pilot",
 
         flightNumber:
-          request.flightNumber ?? request.flightId,
+          request.flightNumber
+          ?? request.flightId,
 
         aircraft:
-          request.aircraft ?? "Unknown Aircraft",
+          request.aircraft
+          ?? "Unknown Aircraft",
 
         route:
-          request.route ?? "Unknown Route",
+          request.route
+          ?? "Unknown Route",
 
         score:
-          evaluation.score ?? 0,
+          evaluation.score
+          ?? 0,
 
         rating:
-          evaluation.rating ?? "PENDING",
+          evaluation.rating
+          ?? "PENDING",
 
         trainingRequired:
-          evaluation.trainingRequired ?? false,
+          evaluation.trainingRequired
+          ?? false,
 
         sopPhases:
-          evaluation.phaseScores ?? {},
+          evaluation.phaseScores
+          ?? {},
 
         exceedances:
-          evaluation.exceedances ?? [],
+          evaluation.exceedances
+          ?? [],
 
         recommendations:
-          evaluation.recommendations ?? []
+          evaluation.recommendations
+          ?? []
 
       });
-
 
 
     return {

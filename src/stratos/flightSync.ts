@@ -1,4 +1,5 @@
 import { FlightEvaluator } from "../evaluation/flightEvaluator.js";
+
 import {
   TelemetryAdapter,
   StratosTelemetry
@@ -7,9 +8,11 @@ import {
 
 export class FlightSync {
 
-  private evaluator: FlightEvaluator;
+  private evaluator:
+    FlightEvaluator;
 
-  private adapter: TelemetryAdapter;
+  private adapter:
+    TelemetryAdapter;
 
 
   constructor() {
