@@ -72,7 +72,7 @@ export class StandardsController {
     const report =
       this.reportGenerator.generate({
 
-        pilotName:
+        pilot:
           request.pilotName ?? "Unknown Pilot",
 
         flightNumber:

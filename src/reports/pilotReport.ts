@@ -1,148 +1,70 @@
-export interface PilotReportData {
-
-  pilotName: string;
-
-  flightNumber: string;
-
+export interface PilotFlightReport {
+  pilot: string;
+  flightNumber?: string;
   aircraft: string;
-
   route: string;
-
   score: number;
-
-  rating: string;
-
-  trainingRequired: boolean;
-
-  sopPhases: Record<string, number>;
-
-  exceedances: string[];
-
-  recommendations: string[];
-
+  rating?: string;
+  trainingRequired?: boolean;
+  sopPhases?: Record<string, unknown>;
+  exceedances?: unknown[];
+  recommendations?: unknown[];
 }
-
-
 
 export class PilotReportGenerator {
 
+  generate(data: PilotFlightReport) {
 
-  generate(
-    data: PilotReportData
-  ): string {
+    const grade =
+      data.score >= 95 ? "A" :
+      data.score >= 90 ? "B" :
+      data.score >= 80 ? "C" :
+      data.score >= 70 ? "D" :
+      "F";
 
+    const status =
+      data.trainingRequired === true
+        ? "TRAINING REQUIRED"
+        : data.score >= 80
+          ? "PASS"
+          : "TRAINING REQUIRED";
 
-    let report = "";
+    return {
+      title: "VirtualDLH Flight Standards Report",
 
+      pilot: data.pilot,
 
+      flightNumber: data.flightNumber,
 
-    report += "VirtualDLH Flight Performance Report\n";
+      aircraft: data.aircraft,
 
-    report += "=================================\n\n";
+      route: data.route,
 
+      finalScore: `${data.score}/100`,
 
-    report += `Pilot: ${data.pilotName}\n`;
+      score: data.score,
 
-    report += `Flight: ${data.flightNumber}\n`;
+      grade,
 
-    report += `Aircraft: ${data.aircraft}\n`;
+      rating: data.rating ?? "PENDING",
 
-    report += `Route: ${data.route}\n\n`;
+      status,
 
+      trainingRequired:
+        data.trainingRequired ?? data.score < 80,
 
+      sopPhases:
+        data.sopPhases ?? {},
 
-    report += `Overall Score: ${data.score}%\n`;
+      exceedances:
+        data.exceedances ?? [],
 
-    report += `Rating: ${data.rating}\n\n`;
+      recommendations:
+        data.recommendations ?? [],
 
-
-
-    report += "SOP Performance:\n";
-
-    report += "----------------\n";
-
-
-    for (
-      const phase in data.sopPhases
-    ) {
-
-      report +=
-        `${phase}: ${data.sopPhases[phase]}%\n`;
-
-    }
-
-
-
-    report += "\nFOQA Findings:\n";
-
-    report += "--------------\n";
-
-
-    if (
-      data.exceedances.length === 0
-    ) {
-
-      report +=
-        "No operational exceedances detected.\n";
-
-    }
-
-    else {
-
-      for (
-        const event of data.exceedances
-      ) {
-
-        report +=
-          `- ${event}\n`;
-
-      }
-
-    }
-
-
-
-    report += "\nTraining Recommendations:\n";
-
-    report += "-------------------------\n";
-
-
-    if (
-      data.recommendations.length === 0
-    ) {
-
-      report +=
-        "No additional training required.\n";
-
-    }
-
-    else {
-
-      for (
-        const item of data.recommendations
-      ) {
-
-        report +=
-          `- ${item}\n`;
-
-      }
-
-    }
-
-
-
-    report += "\nFinal Status:\n";
-
-    report += "-------------\n";
-
-
-    report +=
-      data.trainingRequired
-        ? "TRAINING REVIEW REQUIRED\n"
-        : "FLIGHT STANDARDS PASSED\n";
-
-
-    return report;
+      generatedAt:
+        new Date().toISOString()
+    };
 
   }
 
