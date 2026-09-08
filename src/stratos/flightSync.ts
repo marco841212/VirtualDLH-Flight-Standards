@@ -1,51 +1,40 @@
 import { FlightEvaluator } from "../evaluation/flightEvaluator.js";
-import { TelemetryAdapter } from "./telemetryAdapter.js";
+import {
+  TelemetryAdapter,
+  StratosTelemetry
+} from "./telemetryAdapter.js";
 
 
 export class FlightSync {
-
 
   private evaluator: FlightEvaluator;
 
   private adapter: TelemetryAdapter;
 
 
-
   constructor() {
 
-    this.evaluator = new FlightEvaluator();
+    this.evaluator =
+      new FlightEvaluator();
 
-    this.adapter = new TelemetryAdapter();
+    this.adapter =
+      new TelemetryAdapter();
 
   }
 
 
-
   async processFlight(
-    flightId: string
+    flightId: string,
+    telemetry?: StratosTelemetry
   ) {
 
+    if (!telemetry) {
 
-    const telemetry = {
+      throw new Error(
+        `No live telemetry available for flight ${flightId}`
+      );
 
-
-      altitude: 35000,
-
-      ground_speed: 280,
-
-      vertical_speed: 0,
-
-      on_ground: false,
-
-      gear_down: false,
-
-      flaps_extended: false,
-
-      ils_captured: false
-
-
-    };
-
+    }
 
 
     const flightTelemetry =
@@ -60,24 +49,23 @@ export class FlightSync {
       );
 
 
-
     return {
 
       flightId,
+
+      telemetry:
+        flightTelemetry,
 
       evaluation
 
     };
 
-
   }
-
 
 
   async completeFlight(
     flightId: string
   ) {
-
 
     return {
 
@@ -88,6 +76,5 @@ export class FlightSync {
     };
 
   }
-
 
 }
