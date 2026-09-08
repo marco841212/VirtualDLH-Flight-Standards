@@ -1,4 +1,8 @@
 import type {
+  FlightPhase
+} from "@skyvexsoftware/stratos-sdk";
+
+import type {
   StratosTelemetry
 } from "./telemetryAdapter.js";
 
@@ -7,7 +11,11 @@ export interface FlightTelemetrySample {
 
   timestamp: string;
 
-  telemetry: StratosTelemetry;
+  phase:
+    FlightPhase | null;
+
+  telemetry:
+    StratosTelemetry;
 
 }
 
@@ -42,6 +50,7 @@ export class FlightTelemetryAccumulator {
 
   record(
     telemetry: StratosTelemetry,
+    phase: FlightPhase | null,
     now = Date.now()
   ) {
 
@@ -60,6 +69,8 @@ export class FlightTelemetryAccumulator {
 
       timestamp:
         new Date(now).toISOString(),
+
+      phase,
 
       telemetry: {
         ...telemetry
@@ -96,6 +107,18 @@ export class FlightTelemetryAccumulator {
     return [
       ...this.samples
     ];
+
+  }
+
+
+  getSamplesByPhase(
+    phase: FlightPhase
+  ) {
+
+    return this.samples.filter(
+      sample =>
+        sample.phase === phase
+    );
 
   }
 

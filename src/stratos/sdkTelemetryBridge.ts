@@ -1,5 +1,6 @@
 import type {
   FlightData,
+  FlightPhase,
   PluginFlightAccessor,
   SimDataSnapshot
 } from "@skyvexsoftware/stratos-sdk";
@@ -21,10 +22,16 @@ export class StratosSdkTelemetryBridge {
   private latestTelemetry:
     StratosTelemetry | null = null;
 
+  private currentPhase:
+    FlightPhase | null = null;
+
   private accumulator:
     FlightTelemetryAccumulator;
 
-  private unsubscribe:
+  private unsubscribeSimData:
+    (() => void) | null = null;
+
+  private unsubscribePhase:
     (() => void) | null = null;
 
 
@@ -43,6 +50,33 @@ export class StratosSdkTelemetryBridge {
 
   async start() {
 
+    /*
+     * Hydrate the authoritative Stratos phase.
+     */
+    const phaseSnapshot =
+      await this.flight.getPhase();
+
+    this.currentPhase =
+      phaseSnapshot.currentPhase;
+
+
+    /*
+     * Subscribe to future Stratos phase changes.
+     */
+    this.unsubscribePhase =
+      this.flight.onPhaseChange(
+        payload => {
+
+          this.currentPhase =
+            payload.currentPhase;
+
+        }
+      );
+
+
+    /*
+     * Hydrate current simulator data.
+     */
     const snapshot =
       await this.flight.getSnapshot();
 
@@ -55,7 +89,10 @@ export class StratosSdkTelemetryBridge {
     }
 
 
-    this.unsubscribe =
+    /*
+     * Subscribe to live simulator frames.
+     */
+    this.unsubscribeSimData =
       this.flight.onSimData(
         snapshot => {
 
@@ -71,11 +108,21 @@ export class StratosSdkTelemetryBridge {
 
   stop() {
 
-    if (this.unsubscribe) {
+    if (this.unsubscribeSimData) {
 
-      this.unsubscribe();
+      this.unsubscribeSimData();
 
-      this.unsubscribe =
+      this.unsubscribeSimData =
+        null;
+
+    }
+
+
+    if (this.unsubscribePhase) {
+
+      this.unsubscribePhase();
+
+      this.unsubscribePhase =
         null;
 
     }
@@ -87,6 +134,14 @@ export class StratosSdkTelemetryBridge {
     StratosTelemetry | null {
 
     return this.latestTelemetry;
+
+  }
+
+
+  getCurrentPhase():
+    FlightPhase | null {
+
+    return this.currentPhase;
 
   }
 
@@ -103,6 +158,18 @@ export class StratosSdkTelemetryBridge {
 
     return this.accumulator
       .getSampleCount();
+
+  }
+
+
+  getTelemetryHistoryByPhase(
+    phase: FlightPhase
+  ) {
+
+    return this.accumulator
+      .getSamplesByPhase(
+        phase
+      );
 
   }
 
@@ -148,7 +215,8 @@ export class StratosSdkTelemetryBridge {
 
 
     this.accumulator.record(
-      telemetry
+      telemetry,
+      this.currentPhase
     );
 
   }
