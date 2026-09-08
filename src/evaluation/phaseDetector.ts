@@ -8,7 +8,8 @@ export enum FlightPhase {
   DESCENT = "DESCENT",
   APPROACH = "APPROACH",
   LANDING = "LANDING",
-  TAXI_IN = "TAXI_IN"
+  TAXI_IN = "TAXI_IN",
+  UNKNOWN = "UNKNOWN"
 }
 
 
@@ -192,9 +193,9 @@ export class PhaseDetector {
 
 
     /*
-     * Default
+     * Unknown fallback — do not assume cruise
      */
-    return FlightPhase.CRUISE;
+    return FlightPhase.UNKNOWN;
 
   }
 
