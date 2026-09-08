@@ -1,14 +1,15 @@
 {
+  "$schema": "https://cdn.skyvexsoftware.com/schemas/stratos-plugin.json",
   "id": "virtualdlh-cockpit-standards",
+  "type": "airline",
   "name": "VirtualDLH Cockpit Standards Plugin",
   "version": "1.0.0",
   "description": "VirtualDLH Stratos plugin for cockpit procedure tracking, SOP scoring, and pilot performance reports.",
-  "author": "VirtualDLH",
-  "private": true,
-  "type": "stratos-plugin",
-  "permissions": [
-    "flight.telemetry",
-    "flight.events",
-    "aircraft.data"
-  ]
+  "author": {
+    "id": "virtualdlh",
+    "name": "VirtualDLH"
+  },
+  "icon_light": "icon-light.svg",
+  "icon_dark": "icon-dark.svg",
+  "homepage": "https://virtualdlh.com"
 }

@@ -6,6 +6,7 @@
   "description": "VirtualDLH Stratos Cockpit Standards Plugin",
   "scripts": {
     "build": "tsc",
+    "build:plugin": "node scripts/build-plugin.mjs",
     "test": "tsc --noEmit && npm run test:phase && npm run test:phase-precedence",
     "test:phase": "npm run build && node dist/tests/phaseDetector.test.js",
     "test:phase-precedence": "npm run build && node dist/tests/phasePrecedence.test.js",

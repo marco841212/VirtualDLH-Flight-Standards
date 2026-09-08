@@ -1,0 +1,60 @@
+.vdlh-standards {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 32px;
+}
+
+.vdlh-standards__card {
+  max-width: 760px;
+  padding: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.vdlh-standards__eyebrow {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.68;
+}
+
+.vdlh-standards h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.vdlh-standards__copy {
+  margin: 14px 0 22px;
+  max-width: 640px;
+  line-height: 1.6;
+  opacity: 0.78;
+}
+
+.vdlh-standards__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(5, 22, 77, 0.08);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vdlh-standards__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.vdlh-standards__plugin-id {
+  margin: 18px 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  opacity: 0.55;
+}
