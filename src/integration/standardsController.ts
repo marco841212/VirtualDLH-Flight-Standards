@@ -88,8 +88,30 @@ export class StandardsController {
       );
 
 
+    const evaluationComplete =
+      typeof evaluation.approachScore === "number" &&
+      typeof evaluation.landingScore === "number";
+
+
     const enrichedEvaluation = {
       ...evaluation,
+      evaluationComplete,
+      provisionalScore:
+        evaluationComplete
+          ? undefined
+          : evaluation.score,
+      rating:
+        evaluationComplete
+          ? evaluation.rating
+          : "PENDING",
+      passed:
+        evaluationComplete
+          ? evaluation.passed
+          : false,
+      trainingRequired:
+        evaluationComplete
+          ? evaluation.trainingRequired
+          : false,
       phaseStatistics,
       phaseScores: phaseReport
     };
@@ -117,6 +139,8 @@ export class StandardsController {
         score:
           evaluation.score
           ?? 0,
+
+        evaluationComplete,
 
         rating:
           evaluation.rating
