@@ -6,6 +6,10 @@ import type {
   StratosTelemetry
 } from "./telemetryAdapter.js";
 
+import type {
+  FlightPhaseStatistics
+} from "./flightPhaseAnalyzer.js";
+
 
 export interface MonitorResult {
 
@@ -37,7 +41,8 @@ export class LiveMonitor {
   async monitorFlight(
     flightId: string,
     telemetry?: StratosTelemetry,
-    landingAnalysis?: LandingAnalysis
+    landingAnalysis?: LandingAnalysis,
+    phaseStatistics: FlightPhaseStatistics[] = []
   ): Promise<MonitorResult> {
 
     try {
@@ -46,7 +51,8 @@ export class LiveMonitor {
         await this.flightSync.processFlight(
           flightId,
           telemetry,
-          landingAnalysis
+          landingAnalysis,
+          phaseStatistics
         );
 
 

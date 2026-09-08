@@ -7,6 +7,10 @@ import {
   StratosTelemetry
 } from "./telemetryAdapter.js";
 
+import type {
+  FlightPhaseStatistics
+} from "./flightPhaseAnalyzer.js";
+
 
 export class FlightSync {
 
@@ -31,7 +35,8 @@ export class FlightSync {
   async processFlight(
     flightId: string,
     telemetry?: StratosTelemetry,
-    landingAnalysis?: LandingAnalysis
+    landingAnalysis?: LandingAnalysis,
+    phaseStatistics: FlightPhaseStatistics[] = []
   ) {
 
     if (!telemetry) {
@@ -52,7 +57,8 @@ export class FlightSync {
     const evaluation =
       this.evaluator.evaluate(
         flightTelemetry,
-        landingAnalysis
+        landingAnalysis,
+        phaseStatistics
       );
 
 

@@ -1,4 +1,9 @@
+import { FlightPhase as StratosFlightPhase } from "@skyvexsoftware/stratos-sdk";
 import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+
+import type {
+  FlightPhaseStatistics
+} from "../stratos/flightPhaseAnalyzer.js";
 
 import {
   PhaseDetector,
@@ -97,7 +102,8 @@ export class FlightEvaluator {
 
   evaluate(
     telemetry: FlightTelemetry,
-    landingAnalysis?: LandingAnalysis
+    landingAnalysis?: LandingAnalysis,
+    phaseStatistics: FlightPhaseStatistics[] = []
   ): FlightEvaluation {
 
 
@@ -128,6 +134,30 @@ export class FlightEvaluator {
 
 
 
+    const finalPhaseStatistics =
+      phaseStatistics.find(
+        item =>
+          item.phase === StratosFlightPhase.FINAL
+      );
+
+
+    const finalConfigurationKnown =
+      finalPhaseStatistics !== undefined &&
+      finalPhaseStatistics.sampleCount > 0;
+
+
+    const finalGearDown =
+      finalConfigurationKnown
+        ? finalPhaseStatistics.gearDownPercent === 100
+        : undefined;
+
+
+    const finalFlapsConfigured =
+      finalConfigurationKnown
+        ? finalPhaseStatistics.flapsExtendedPercent === 100
+        : undefined;
+
+
     const approachResult =
       landingAnalysis
         ? evaluateApproach({
@@ -148,13 +178,16 @@ export class FlightEvaluator {
               ?? landingAnalysis.approachVs,
 
             gearDown:
-              telemetry.gearDown,
+              finalGearDown,
 
             flapsConfigured:
-              landingAnalysis.touchdownFlapsIndex
-                !== null
-                ? landingAnalysis.touchdownFlapsIndex > 0
-                : telemetry.flapsExtended
+              finalFlapsConfigured
+              ?? (
+                landingAnalysis.touchdownFlapsIndex
+                  !== null
+                  ? landingAnalysis.touchdownFlapsIndex > 0
+                  : undefined
+              )
 
           })
         : null;

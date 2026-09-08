@@ -58,7 +58,8 @@ export class StandardsController {
       await this.liveMonitor.monitorFlight(
         request.flightId,
         telemetry,
-        landingAnalysis
+        landingAnalysis,
+        phaseStatistics
       );
 
 

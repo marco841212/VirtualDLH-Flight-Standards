@@ -145,7 +145,7 @@ export function evaluateApproach(
    * Landing Configuration
    */
   if (
-    data.gearDown !== true
+    data.gearDown === false
   ) {
 
     violations.push(
@@ -159,7 +159,7 @@ export function evaluateApproach(
 
 
   if (
-    data.flapsConfigured !== true
+    data.flapsConfigured === false
   ) {
 
     violations.push(
