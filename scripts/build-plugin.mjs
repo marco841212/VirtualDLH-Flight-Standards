@@ -1,5 +1,7 @@
 import {
-  existsSync
+  copyFileSync,
+  existsSync,
+  rmSync
 } from "node:fs";
 
 import {
@@ -11,9 +13,18 @@ import {
 } from "node:path";
 
 
+const projectRoot =
+  process.cwd();
+
+const distDir =
+  resolve(
+    projectRoot,
+    "dist"
+  );
+
 const viteCli =
   resolve(
-    process.cwd(),
+    projectRoot,
     "node_modules",
     "vite",
     "bin",
@@ -82,7 +93,100 @@ function runViteBuild(
 }
 
 
+function copyManifestIconsToRoot() {
+
+  const icons = [
+    "icon-light.svg",
+    "icon-dark.svg"
+  ];
+
+
+  for (const icon of icons) {
+
+    const source =
+      resolve(
+        distDir,
+        "assets",
+        icon
+      );
+
+    const destination =
+      resolve(
+        distDir,
+        icon
+      );
+
+
+    if (!existsSync(source)) {
+
+      throw new Error(
+        `Missing Stratos plugin asset: assets/${icon}`
+      );
+
+    }
+
+
+    copyFileSync(
+      source,
+      destination
+    );
+
+  }
+
+}
+
+
+function validateDistribution() {
+
+  const requiredFiles = [
+    "plugin.json",
+    "icon-light.svg",
+    "icon-dark.svg",
+    "ui/index.js",
+    "background/index.js"
+  ];
+
+
+  for (const file of requiredFiles) {
+
+    if (
+      !existsSync(
+        resolve(
+          distDir,
+          file
+        )
+      )
+    ) {
+
+      throw new Error(
+        `Incomplete Stratos distribution: missing dist/${file}`
+      );
+
+    }
+
+  }
+
+
+  console.log(
+    "Stratos distribution validated."
+  );
+
+}
+
+
+rmSync(
+  distDir,
+  {
+    recursive: true,
+    force: true
+  }
+);
+
+
 runViteBuild();
 runViteBuild(
   "background"
 );
+
+copyManifestIconsToRoot();
+validateDistribution();
