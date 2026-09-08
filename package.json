@@ -17,10 +17,11 @@
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
-    "typescript": "^5.4.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
   },
   "dependencies": {
+    "@skyvexsoftware/stratos-sdk": "^0.16.5",
     "dotenv": "^17.4.2"
   }
 }
