@@ -15,7 +15,8 @@
     "test:overspeed": "npm run build && node dist/tests/overspeed.test.js",
     "test:sinkrate": "npm run build && node dist/tests/sinkRate.test.js",
     "test:approach": "npm run build && node dist/tests/approach.test.js",
-    "test:landing": "npm run build && node dist/tests/landing.test.js"
+    "test:landing": "npm run build && node dist/tests/landing.test.js",
+    "test:stratos-integration": "npm run build && node dist/tests/stratosIntegration.test.js"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
