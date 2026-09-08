@@ -1,5 +1,7 @@
-import { FlightPhase as StratosFlightPhase } from "@skyvexsoftware/stratos-sdk";
-import type { LandingAnalysis } from "@skyvexsoftware/stratos-sdk";
+import type {
+  FlightPhase as StratosFlightPhase,
+  LandingAnalysis
+} from "@skyvexsoftware/stratos-sdk";
 
 import type {
   FlightPhaseStatistics
@@ -47,6 +49,15 @@ import {
 } from "../foqa/events.js";
 
 
+const STRATOS_FINAL_PHASE =
+  "FINAL" as StratosFlightPhase;
+
+const STRATOS_TAXI_PHASE =
+  "TAXI" as StratosFlightPhase;
+
+const STRATOS_TAXI_IN_PHASE =
+  "TAXI_IN" as StratosFlightPhase;
+
 
 export interface FlightEvaluation {
 
@@ -79,7 +90,6 @@ export interface FlightEvaluation {
 }
 
 
-
 export class FlightEvaluator {
 
 
@@ -103,7 +113,6 @@ export class FlightEvaluator {
     new FOQAScoringEngine();
 
 
-
   evaluate(
     telemetry: FlightTelemetry,
     landingAnalysis?: LandingAnalysis,
@@ -118,7 +127,6 @@ export class FlightEvaluator {
       ?? this.phaseDetector.detect(
         telemetry
       );
-
 
 
     const sopResult =
@@ -140,11 +148,10 @@ export class FlightEvaluator {
       });
 
 
-
     const finalPhaseStatistics =
       phaseStatistics.find(
         item =>
-          item.phase === StratosFlightPhase.FINAL
+          item.phase === STRATOS_FINAL_PHASE
       );
 
 
@@ -200,7 +207,6 @@ export class FlightEvaluator {
         : null;
 
 
-
     const reverseThrustKnown =
       telemetry.reverser1Deployed
         !== undefined ||
@@ -235,7 +241,6 @@ export class FlightEvaluator {
         : null;
 
 
-
     const historyEvents =
       telemetryHistory.flatMap(
         sample => {
@@ -258,8 +263,8 @@ export class FlightEvaluator {
               sample.telemetry.overspeed_warning,
 
             taxiSpeed:
-              sample.phase === StratosFlightPhase.TAXI ||
-              sample.phase === StratosFlightPhase.TAXI_IN
+              sample.phase === STRATOS_TAXI_PHASE ||
+              sample.phase === STRATOS_TAXI_IN_PHASE
                 ? sample.telemetry.ground_speed
                 : undefined
 
@@ -347,7 +352,6 @@ export class FlightEvaluator {
       );
 
 
-
     const finalGrade =
       calculateFlightGrade({
 
@@ -364,7 +368,6 @@ export class FlightEvaluator {
           foqaResult.finalScore
 
       });
-
 
 
     return {
