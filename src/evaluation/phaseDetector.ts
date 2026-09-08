@@ -16,9 +16,17 @@ export interface FlightTelemetry {
 
   altitude: number;
 
+  altitudeAgl?: number;
+
   groundSpeed: number;
 
+  indicatedAirspeed?: number;
+
   verticalSpeed: number;
+
+  bankAngle?: number;
+
+  pitch?: number;
 
   onGround: boolean;
 
@@ -27,6 +35,28 @@ export interface FlightTelemetry {
   flapsExtended?: boolean;
 
   ilsCaptured?: boolean;
+
+  overspeedWarning?: boolean;
+
+  stallWarning?: boolean;
+
+  crashed?: boolean;
+
+  landingRate?: number;
+
+  landingDistance?: number;
+
+  glideslopeDeviation?: number;
+
+  localizerDeviation?: number;
+
+  reverser1Deployed?: boolean;
+
+  reverser2Deployed?: boolean;
+
+  autobrakePosition?: number;
+
+  speedbrakePosition?: number;
 
 }
 

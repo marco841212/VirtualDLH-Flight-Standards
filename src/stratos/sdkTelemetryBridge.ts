@@ -316,11 +316,23 @@ export class StratosSdkTelemetryBridge {
       altitude:
         data.altitude,
 
+      altitude_agl:
+        data.altitudeAgl,
+
       ground_speed:
         data.groundSpeed,
 
+      indicated_airspeed:
+        data.indicatedAirspeed,
+
       vertical_speed:
         data.verticalSpeed,
+
+      bank_angle:
+        data.bank,
+
+      pitch:
+        data.pitch,
 
       on_ground:
         data.planeOnground,
@@ -333,7 +345,40 @@ export class StratosSdkTelemetryBridge {
           data.flapsControl > 0 ||
           data.flapsLeftPosition > 0 ||
           data.flapsRightPosition > 0
-        )
+        ),
+
+      overspeed_warning:
+        data.overspeedWarning,
+
+      stall_warning:
+        data.stallWarning,
+
+      crashed:
+        data.crashed,
+
+      landing_rate:
+        data.landingRate,
+
+      landing_distance:
+        data.landingDistance,
+
+      glideslope_deviation:
+        data.glideslopeDeviation,
+
+      localizer_deviation:
+        data.localizerDeviation,
+
+      reverser_1_deployed:
+        data.reverser1Deployed,
+
+      reverser_2_deployed:
+        data.reverser2Deployed,
+
+      autobrake_position:
+        data.autobrakePosition,
+
+      speedbrake_position:
+        data.speedbrakePosition
 
     };
 
