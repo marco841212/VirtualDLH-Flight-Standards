@@ -13,6 +13,21 @@ type Handler =
   (payload: any) => void;
 
 
+function requireHandler(
+  handler: Handler | null,
+  message: string
+): Handler {
+
+  assert.ok(
+    handler,
+    message
+  );
+
+  return handler as Handler;
+
+}
+
+
 async function runStratosIntegrationTest() {
 
   let phaseHandler:
@@ -121,23 +136,26 @@ async function runStratosIntegrationTest() {
   );
 
 
-  assert.ok(
-    phaseHandler,
-    "Phase change subscription should be registered"
-  );
+  const emitPhase =
+    requireHandler(
+      phaseHandler,
+      "Phase change subscription should be registered"
+    );
 
-  assert.ok(
-    landingHandler,
-    "Landing subscription should be registered"
-  );
+  const emitLanding =
+    requireHandler(
+      landingHandler,
+      "Landing subscription should be registered"
+    );
 
-  assert.ok(
-    simDataHandler,
-    "Simulator data subscription should be registered"
-  );
+  const emitSimData =
+    requireHandler(
+      simDataHandler,
+      "Simulator data subscription should be registered"
+    );
 
 
-  simDataHandler({
+  emitSimData({
     isConnected: false,
     data: {
       altitude: 20000
@@ -152,7 +170,7 @@ async function runStratosIntegrationTest() {
   );
 
 
-  simDataHandler({
+  emitSimData({
     isConnected: true,
     data: {
       altitude: 20000,
@@ -247,12 +265,12 @@ async function runStratosIntegrationTest() {
   );
 
 
-  phaseHandler({
+  emitPhase({
     currentPhase: "FINAL"
   });
 
 
-  landingHandler({
+  emitLanding({
     landingAnalysis: {
       landingRateFpm: -180,
       landingDistanceFt: 800,
