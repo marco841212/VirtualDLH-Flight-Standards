@@ -133,11 +133,15 @@ export default createPlugin({
           });
 
 
-        if (!result.success) {
+        const evaluationResult =
+          result as any;
+
+
+        if (!evaluationResult.success) {
 
           ctx.logger.info(
             "VirtualDLH Flight Standards",
-            `Evaluation skipped: ${result.error ?? "Unknown evaluation error"}`
+            `Evaluation skipped: ${evaluationResult.error ?? "Unknown evaluation error"}`
           );
 
           return;
@@ -146,7 +150,7 @@ export default createPlugin({
 
 
         const evaluation =
-          result.evaluation as any;
+          evaluationResult.evaluation as any;
 
 
         const score =
