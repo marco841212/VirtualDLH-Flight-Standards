@@ -1,6 +1,6 @@
 {
   "name": "virtualdlh-flight-standards",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "description": "VirtualDLH Stratos Cockpit Standards Plugin",
