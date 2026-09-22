@@ -49,6 +49,16 @@ export interface StratosTelemetry {
 
   speedbrake_position?: number;
 
+  beacon_light?: boolean;
+
+  strobe_light?: boolean;
+
+  landing_lights?: boolean;
+
+  taxi_light?: boolean;
+
+  nav_light?: boolean;
+
 }
 
 
@@ -152,7 +162,27 @@ export class TelemetryAdapter {
 
 
       speedbrakePosition:
-        data.speedbrake_position
+        data.speedbrake_position,
+
+
+      beaconLight:
+        data.beacon_light,
+
+
+      strobeLight:
+        data.strobe_light,
+
+
+      landingLights:
+        data.landing_lights,
+
+
+      taxiLight:
+        data.taxi_light,
+
+
+      navLight:
+        data.nav_light
 
     };
 
