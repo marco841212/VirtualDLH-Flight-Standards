@@ -1,10 +1,10 @@
 export interface TakeoffData {
 
-    beacon: boolean;
+    beacon?: boolean;
 
-    strobe: boolean;
+    strobe?: boolean;
 
-    landingLights: boolean;
+    landingLights?: boolean;
 
     rotationSpeed?: number;
 
@@ -40,36 +40,57 @@ export class TakeoffRules {
 
 
 
-        if (!data.beacon) {
+        if (data.beacon === false) {
 
             score -= 20;
 
             notes.push(
-                "Beacon light not configured"
+                "Beacon light was OFF during takeoff"
+            );
+
+        }
+        else if (data.beacon === true) {
+
+            notes.push(
+                "Beacon light confirmed ON during takeoff"
             );
 
         }
 
 
 
-        if (!data.strobe) {
+        if (data.strobe === false) {
 
             score -= 20;
 
             notes.push(
-                "Strobe light not configured"
+                "Strobe light was OFF during takeoff"
+            );
+
+        }
+        else if (data.strobe === true) {
+
+            notes.push(
+                "Strobe light confirmed ON during takeoff"
             );
 
         }
 
 
 
-        if (!data.landingLights) {
+        if (data.landingLights === false) {
 
             score -= 10;
 
             notes.push(
-                "Landing lights not configured"
+                "Landing lights were OFF during takeoff"
+            );
+
+        }
+        else if (data.landingLights === true) {
+
+            notes.push(
+                "Landing lights confirmed ON during takeoff"
             );
 
         }
@@ -85,6 +106,20 @@ export class TakeoffRules {
 
             notes.push(
                 "Low initial climb performance"
+            );
+
+        }
+
+
+
+        if (
+            data.beacon === undefined &&
+            data.strobe === undefined &&
+            data.landingLights === undefined
+        ) {
+
+            notes.push(
+                "Aircraft light telemetry unavailable from Stratos for takeoff"
             );
 
         }
