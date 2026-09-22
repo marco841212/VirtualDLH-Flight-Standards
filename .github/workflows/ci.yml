@@ -28,3 +28,19 @@ jobs:
 
       - name: Build Stratos plugin
         run: npm run build:plugin
+
+      - name: Create Skyvex upload bundle
+        run: |
+          rm -f bundle.zip
+          cd dist
+          zip -r ../bundle.zip .
+          cd ..
+          unzip -l bundle.zip
+
+      - name: Upload Skyvex bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: virtualdlh-stratos-v1.0.2
+          path: bundle.zip
+          if-no-files-found: error
+          retention-days: 30
