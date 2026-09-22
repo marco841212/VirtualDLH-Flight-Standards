@@ -171,6 +171,18 @@ export class StandardsController {
 
         recommendations:
           evaluation.recommendations
+          ?? [],
+
+        lightTelemetryAvailable:
+          evaluation.lightTelemetryAvailable
+          ?? false,
+
+        lightStatus:
+          evaluation.lightStatus
+          ?? {},
+
+        lightEvents:
+          evaluation.lightEvents
           ?? []
 
       });
