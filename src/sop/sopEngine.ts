@@ -86,13 +86,9 @@ export class SOPEngine {
       );
 
 
-      if (!result.passed) {
-
-        violations.push(
-          ...result.notes
-        );
-
-      }
+      violations.push(
+        ...result.violations
+      );
 
     }
 
