@@ -10,6 +10,9 @@ export interface PilotFlightReport {
   sopPhases?: Record<string, unknown>;
   exceedances?: unknown[];
   recommendations?: unknown[];
+  lightTelemetryAvailable?: boolean;
+  lightStatus?: Record<string, boolean | undefined>;
+  lightEvents?: unknown[];
 }
 
 export class PilotReportGenerator {
@@ -84,6 +87,15 @@ export class PilotReportGenerator {
 
       recommendations:
         data.recommendations ?? [],
+
+      lightTelemetryAvailable:
+        data.lightTelemetryAvailable ?? false,
+
+      lightStatus:
+        data.lightStatus ?? {},
+
+      lightEvents:
+        data.lightEvents ?? [],
 
       generatedAt:
         new Date().toISOString()
