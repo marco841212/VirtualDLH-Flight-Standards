@@ -16,6 +16,35 @@ const LANDING_EVALUATION_DELAY_MS =
   750;
 
 
+function formatLightStatus(
+  status: any
+) {
+
+  const value = (
+    key: string
+  ) => {
+
+    const state =
+      status?.[key];
+
+    return typeof state === "boolean"
+      ? state ? "ON" : "OFF"
+      : "N/A";
+
+  };
+
+
+  return [
+    `beacon=${value("beacon")}`,
+    `strobe=${value("strobe")}`,
+    `landing=${value("landing")}`,
+    `taxi=${value("taxi")}`,
+    `nav=${value("navigation")}`
+  ].join(",");
+
+}
+
+
 let evaluationTimer:
   ReturnType<typeof setInterval> | null = null;
 
@@ -175,6 +204,20 @@ export default createPlugin({
             : 0;
 
 
+        const lightEvents =
+          Array.isArray(
+            evaluation.lightEvents
+          )
+            ? evaluation.lightEvents.length
+            : 0;
+
+
+        const lightStatus =
+          formatLightStatus(
+            evaluation.lightStatus
+          );
+
+
         const signature = [
           String(
             evaluation.phase
@@ -197,6 +240,10 @@ export default createPlugin({
           String(
             evaluation.evaluationComplete
             ?? false
+          ),
+          lightStatus,
+          String(
+            lightEvents
           )
         ].join(
           "|"
@@ -216,7 +263,7 @@ export default createPlugin({
 
           ctx.logger.info(
             "VirtualDLH Flight Standards",
-            `${evaluationLabel}: phase=${evaluation.phase ?? "UNKNOWN"} score=${score ?? 0} rating=${evaluation.rating ?? "PENDING"} foqa=${evaluation.foqaScore ?? 0} violations=${violations} exceedances=${exceedances} complete=${evaluation.evaluationComplete === true}`
+            `${evaluationLabel}: phase=${evaluation.phase ?? "UNKNOWN"} score=${score ?? 0} rating=${evaluation.rating ?? "PENDING"} foqa=${evaluation.foqaScore ?? 0} violations=${violations} exceedances=${exceedances} complete=${evaluation.evaluationComplete === true} lights=[${lightStatus}] lightEvents=${lightEvents}`
           );
 
 

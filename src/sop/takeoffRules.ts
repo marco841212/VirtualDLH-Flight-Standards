@@ -1,10 +1,10 @@
 export interface TakeoffData {
 
-    beacon: boolean;
+    beacon?: boolean;
 
-    strobe: boolean;
+    strobe?: boolean;
 
-    landingLights: boolean;
+    landingLights?: boolean;
 
     rotationSpeed?: number;
 
@@ -19,6 +19,8 @@ export interface SOPResult {
     score: number;
 
     passed: boolean;
+
+    violations: string[];
 
     notes: string[];
 
@@ -38,38 +40,61 @@ export class TakeoffRules {
 
         const notes: string[] = [];
 
+        const violations: string[] = [];
 
 
-        if (!data.beacon) {
+
+        if (data.beacon === false) {
 
             score -= 20;
 
+            violations.push(
+                "Beacon light was OFF during takeoff"
+            );
+
+        }
+        else if (data.beacon === true) {
+
             notes.push(
-                "Beacon light not configured"
+                "Beacon light confirmed ON during takeoff"
             );
 
         }
 
 
 
-        if (!data.strobe) {
+        if (data.strobe === false) {
 
             score -= 20;
 
+            violations.push(
+                "Strobe light was OFF during takeoff"
+            );
+
+        }
+        else if (data.strobe === true) {
+
             notes.push(
-                "Strobe light not configured"
+                "Strobe light confirmed ON during takeoff"
             );
 
         }
 
 
 
-        if (!data.landingLights) {
+        if (data.landingLights === false) {
 
             score -= 10;
 
+            violations.push(
+                "Landing lights were OFF during takeoff"
+            );
+
+        }
+        else if (data.landingLights === true) {
+
             notes.push(
-                "Landing lights not configured"
+                "Landing lights confirmed ON during takeoff"
             );
 
         }
@@ -83,8 +108,22 @@ export class TakeoffRules {
 
             score -= 10;
 
-            notes.push(
+            violations.push(
                 "Low initial climb performance"
+            );
+
+        }
+
+
+
+        if (
+            data.beacon === undefined &&
+            data.strobe === undefined &&
+            data.landingLights === undefined
+        ) {
+
+            notes.push(
+                "Aircraft light telemetry unavailable from Stratos for takeoff"
             );
 
         }
@@ -96,6 +135,8 @@ export class TakeoffRules {
             score,
 
             passed: score >= 80,
+
+            violations,
 
             notes
 

@@ -59,6 +59,248 @@ const STRATOS_TAXI_IN_PHASE =
   "TAXI_IN" as StratosFlightPhase;
 
 
+const TAKEOFF_PHASE_NAMES =
+  new Set([
+    "TAKEOFF",
+    "TAKEOFF_ROLL",
+    "INITIAL_CLIMB"
+  ]);
+
+
+type HistoryLightField =
+  | "beacon_light"
+  | "strobe_light"
+  | "landing_lights"
+  | "taxi_light"
+  | "nav_light";
+
+
+export type FlightLightName =
+  | "BEACON"
+  | "STROBE"
+  | "LANDING"
+  | "TAXI"
+  | "NAVIGATION";
+
+
+export interface FlightLightStatus {
+
+  beacon?: boolean;
+
+  strobe?: boolean;
+
+  landing?: boolean;
+
+  taxi?: boolean;
+
+  navigation?: boolean;
+
+}
+
+
+export interface FlightLightEvent {
+
+  light: FlightLightName;
+
+  state: "ON" | "OFF";
+
+  timestamp: string;
+
+  phase: string | null;
+
+}
+
+
+const LIGHT_FIELDS: Array<{
+  light: FlightLightName;
+  field: HistoryLightField;
+}> = [
+  { light: "BEACON", field: "beacon_light" },
+  { light: "STROBE", field: "strobe_light" },
+  { light: "LANDING", field: "landing_lights" },
+  { light: "TAXI", field: "taxi_light" },
+  { light: "NAVIGATION", field: "nav_light" }
+];
+
+
+function findTakeoffTelemetry(
+  history: FlightTelemetrySample[]
+): FlightTelemetrySample["telemetry"] | undefined {
+
+  const phaseSample =
+    history.find(
+      sample =>
+        TAKEOFF_PHASE_NAMES.has(
+          String(sample.phase ?? "")
+        )
+    );
+
+  if (phaseSample) {
+
+    return phaseSample.telemetry;
+
+  }
+
+
+  const lowDepartureSample =
+    history.find(
+      sample =>
+        sample.telemetry.on_ground === false &&
+        typeof sample.telemetry.altitude_agl === "number" &&
+        sample.telemetry.altitude_agl <= 1500 &&
+        (sample.telemetry.vertical_speed ?? 0) > 0
+    );
+
+
+  return lowDepartureSample
+    ?.telemetry;
+
+}
+
+
+function latestHistoryLight(
+  history: FlightTelemetrySample[],
+  field: HistoryLightField
+): boolean | undefined {
+
+  for (
+    let index = history.length - 1;
+    index >= 0;
+    index--
+  ) {
+
+    const value =
+      history[index]
+        .telemetry[field];
+
+    if (typeof value === "boolean") {
+
+      return value;
+
+    }
+
+  }
+
+
+  return undefined;
+
+}
+
+
+function buildLightStatus(
+  history: FlightTelemetrySample[],
+  telemetry: FlightTelemetry
+): FlightLightStatus {
+
+  return {
+
+    beacon:
+      latestHistoryLight(
+        history,
+        "beacon_light"
+      ) ?? telemetry.beaconLight,
+
+    strobe:
+      latestHistoryLight(
+        history,
+        "strobe_light"
+      ) ?? telemetry.strobeLight,
+
+    landing:
+      latestHistoryLight(
+        history,
+        "landing_lights"
+      ) ?? telemetry.landingLights,
+
+    taxi:
+      latestHistoryLight(
+        history,
+        "taxi_light"
+      ) ?? telemetry.taxiLight,
+
+    navigation:
+      latestHistoryLight(
+        history,
+        "nav_light"
+      ) ?? telemetry.navLight
+
+  };
+
+}
+
+
+function buildLightEvents(
+  history: FlightTelemetrySample[]
+): FlightLightEvent[] {
+
+  const events: FlightLightEvent[] = [];
+
+  const lastState =
+    new Map<
+      FlightLightName,
+      boolean
+    >();
+
+
+  for (const sample of history) {
+
+    for (const item of LIGHT_FIELDS) {
+
+      const value =
+        sample.telemetry[
+          item.field
+        ];
+
+      if (typeof value !== "boolean") {
+
+        continue;
+
+      }
+
+
+      if (
+        lastState.get(item.light) === value
+      ) {
+
+        continue;
+
+      }
+
+
+      events.push({
+
+        light:
+          item.light,
+
+        state:
+          value ? "ON" : "OFF",
+
+        timestamp:
+          sample.timestamp,
+
+        phase:
+          sample.phase
+            ? String(sample.phase)
+            : null
+
+      });
+
+
+      lastState.set(
+        item.light,
+        value
+      );
+
+    }
+
+  }
+
+
+  return events;
+
+}
+
+
 export interface FlightEvaluation {
 
   phase: FlightPhase | StratosFlightPhase;
@@ -73,6 +315,8 @@ export interface FlightEvaluation {
 
   cruiseScore: number;
 
+  takeoffScore: number | null;
+
   approachScore: number | null;
 
   landingScore: number | null;
@@ -86,6 +330,12 @@ export interface FlightEvaluation {
   exceedances: string[];
 
   recommendations: string[];
+
+  lightTelemetryAvailable: boolean;
+
+  lightStatus: FlightLightStatus;
+
+  lightEvents: FlightLightEvent[];
 
 }
 
@@ -129,8 +379,60 @@ export class FlightEvaluator {
       );
 
 
+    const takeoffTelemetry =
+      findTakeoffTelemetry(
+        telemetryHistory
+      );
+
+
+    const lightStatus =
+      buildLightStatus(
+        telemetryHistory,
+        telemetry
+      );
+
+
+    const lightEvents =
+      buildLightEvents(
+        telemetryHistory
+      );
+
+
+    const lightTelemetryAvailable =
+      Object.values(
+        lightStatus
+      ).some(
+        value =>
+          typeof value === "boolean"
+      );
+
+
     const sopResult =
       this.sopEngine.evaluateFlight({
+
+        takeoff:
+          takeoffTelemetry
+            ? {
+
+                beacon:
+                  takeoffTelemetry.beacon_light,
+
+                strobe:
+                  takeoffTelemetry.strobe_light,
+
+                landingLights:
+                  takeoffTelemetry.landing_lights,
+
+                climbRate:
+                  (
+                    takeoffTelemetry.vertical_speed
+                    ?? 0
+                  ) > 0
+                    ? takeoffTelemetry.vertical_speed
+                    : undefined
+
+              }
+            : undefined,
 
         cruise: {
 
@@ -391,6 +693,11 @@ export class FlightEvaluator {
         sopResult.overallScore,
 
 
+      takeoffScore:
+        sopResult.phaseScores.takeoff
+        ?? null,
+
+
       approachScore:
         approachResult?.score
         ?? null,
@@ -440,7 +747,16 @@ export class FlightEvaluator {
       recommendations:
         exceedances.map(
           item => item.trainingRecommendation
-        )
+        ),
+
+
+      lightTelemetryAvailable,
+
+
+      lightStatus,
+
+
+      lightEvents
 
     };
 
