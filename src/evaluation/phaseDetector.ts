@@ -61,6 +61,16 @@ export interface FlightTelemetry {
 
   speedbrakePosition?: number;
 
+  beaconLight?: boolean;
+
+  strobeLight?: boolean;
+
+  landingLights?: boolean;
+
+  taxiLight?: boolean;
+
+  navLight?: boolean;
+
 }
 
 
