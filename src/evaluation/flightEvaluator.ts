@@ -128,14 +128,12 @@ function findTakeoffTelemetry(
 ): FlightTelemetrySample["telemetry"] | undefined {
 
   const phaseSample =
-    [...history]
-      .reverse()
-      .find(
-        sample =>
-          TAKEOFF_PHASE_NAMES.has(
-            String(sample.phase ?? "")
-          )
-      );
+    history.find(
+      sample =>
+        TAKEOFF_PHASE_NAMES.has(
+          String(sample.phase ?? "")
+        )
+    );
 
   if (phaseSample) {
 
@@ -426,7 +424,12 @@ export class FlightEvaluator {
                   takeoffTelemetry.landing_lights,
 
                 climbRate:
-                  takeoffTelemetry.vertical_speed
+                  (
+                    takeoffTelemetry.vertical_speed
+                    ?? 0
+                  ) > 0
+                    ? takeoffTelemetry.vertical_speed
+                    : undefined
 
               }
             : undefined,
