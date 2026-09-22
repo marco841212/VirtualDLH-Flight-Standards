@@ -19,6 +19,164 @@ import {
 } from "./flightPhaseAnalyzer.js";
 
 
+type UnknownRecord =
+  Record<string, unknown>;
+
+
+function toOptionalBoolean(
+  value: unknown
+): boolean | undefined {
+
+  if (typeof value === "boolean") {
+
+    return value;
+
+  }
+
+
+  if (typeof value === "number") {
+
+    if (!Number.isFinite(value)) {
+
+      return undefined;
+
+    }
+
+    return value !== 0;
+
+  }
+
+
+  if (typeof value === "string") {
+
+    const normalized =
+      value.trim().toLowerCase();
+
+    if (
+      normalized === "true" ||
+      normalized === "on" ||
+      normalized === "1" ||
+      normalized === "yes"
+    ) {
+
+      return true;
+
+    }
+
+    if (
+      normalized === "false" ||
+      normalized === "off" ||
+      normalized === "0" ||
+      normalized === "no"
+    ) {
+
+      return false;
+
+    }
+
+  }
+
+
+  return undefined;
+
+}
+
+
+function readBooleanField(
+  source: UnknownRecord,
+  keys: string[]
+): boolean | undefined {
+
+  for (const key of keys) {
+
+    if (!(key in source)) {
+
+      continue;
+
+    }
+
+    const value =
+      toOptionalBoolean(
+        source[key]
+      );
+
+    if (value !== undefined) {
+
+      return value;
+
+    }
+
+  }
+
+
+  return undefined;
+
+}
+
+
+function readLightState(
+  data: FlightData,
+  directKeys: string[],
+  nestedKeys: string[]
+): boolean | undefined {
+
+  const source =
+    data as unknown as UnknownRecord;
+
+
+  const direct =
+    readBooleanField(
+      source,
+      directKeys
+    );
+
+  if (direct !== undefined) {
+
+    return direct;
+
+  }
+
+
+  const nestedCandidates = [
+    source.lights,
+    source.lightStates,
+    source.aircraftLights
+  ];
+
+
+  for (const candidate of nestedCandidates) {
+
+    if (
+      typeof candidate !== "object" ||
+      candidate === null ||
+      Array.isArray(candidate)
+    ) {
+
+      continue;
+
+    }
+
+
+    const nested =
+      readBooleanField(
+        candidate as UnknownRecord,
+        nestedKeys
+      );
+
+    if (nested !== undefined) {
+
+      return nested;
+
+    }
+
+  }
+
+
+  return undefined;
+
+}
+
+
 export class StratosSdkTelemetryBridge {
 
   private flight:
@@ -381,7 +539,116 @@ export class StratosSdkTelemetryBridge {
         data.autobrakePosition,
 
       speedbrake_position:
-        data.speedbrakePosition
+        data.speedbrakePosition,
+
+      beacon_light:
+        readLightState(
+          data,
+          [
+            "beaconLight",
+            "beaconLights",
+            "lightBeacon",
+            "lightsBeacon",
+            "beacon",
+            "beacon_light",
+            "light_beacon"
+          ],
+          [
+            "beacon",
+            "beaconLight",
+            "beaconLights",
+            "beacon_light"
+          ]
+        ),
+
+      strobe_light:
+        readLightState(
+          data,
+          [
+            "strobeLight",
+            "strobeLights",
+            "lightStrobe",
+            "lightsStrobe",
+            "strobe",
+            "strobe_light",
+            "light_strobe"
+          ],
+          [
+            "strobe",
+            "strobeLight",
+            "strobeLights",
+            "strobe_light"
+          ]
+        ),
+
+      landing_lights:
+        readLightState(
+          data,
+          [
+            "landingLight",
+            "landingLights",
+            "lightLanding",
+            "lightsLanding",
+            "landing_light",
+            "landing_lights",
+            "light_landing"
+          ],
+          [
+            "landing",
+            "landingLight",
+            "landingLights",
+            "landing_light",
+            "landing_lights"
+          ]
+        ),
+
+      taxi_light:
+        readLightState(
+          data,
+          [
+            "taxiLight",
+            "taxiLights",
+            "lightTaxi",
+            "lightsTaxi",
+            "taxi_light",
+            "taxi_lights",
+            "light_taxi"
+          ],
+          [
+            "taxi",
+            "taxiLight",
+            "taxiLights",
+            "taxi_light",
+            "taxi_lights"
+          ]
+        ),
+
+      nav_light:
+        readLightState(
+          data,
+          [
+            "navLight",
+            "navLights",
+            "navigationLight",
+            "navigationLights",
+            "lightNav",
+            "lightsNav",
+            "nav_light",
+            "nav_lights",
+            "navigation_light",
+            "navigation_lights"
+          ],
+          [
+            "nav",
+            "navigation",
+            "navLight",
+            "navLights",
+            "navigationLight",
+            "navigationLights",
+            "nav_light",
+            "navigation_light"
+          ]
+        )
 
     };
 
