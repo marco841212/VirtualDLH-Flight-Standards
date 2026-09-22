@@ -20,6 +20,8 @@ export interface SOPResult {
 
     passed: boolean;
 
+    violations: string[];
+
     notes: string[];
 
 }
@@ -38,13 +40,15 @@ export class TakeoffRules {
 
         const notes: string[] = [];
 
+        const violations: string[] = [];
+
 
 
         if (data.beacon === false) {
 
             score -= 20;
 
-            notes.push(
+            violations.push(
                 "Beacon light was OFF during takeoff"
             );
 
@@ -63,7 +67,7 @@ export class TakeoffRules {
 
             score -= 20;
 
-            notes.push(
+            violations.push(
                 "Strobe light was OFF during takeoff"
             );
 
@@ -82,7 +86,7 @@ export class TakeoffRules {
 
             score -= 10;
 
-            notes.push(
+            violations.push(
                 "Landing lights were OFF during takeoff"
             );
 
@@ -104,7 +108,7 @@ export class TakeoffRules {
 
             score -= 10;
 
-            notes.push(
+            violations.push(
                 "Low initial climb performance"
             );
 
@@ -131,6 +135,8 @@ export class TakeoffRules {
             score,
 
             passed: score >= 80,
+
+            violations,
 
             notes
 
