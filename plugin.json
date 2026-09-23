@@ -3,7 +3,7 @@
   "id": "virtualdlh-cockpit-standards",
   "type": "airline",
   "name": "VirtualDLH Cockpit Standards Plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "VirtualDLH Stratos plugin for cockpit procedure tracking, SOP scoring, and pilot performance reports.",
   "author": {
     "id": "virtualdlh",

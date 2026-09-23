@@ -208,6 +208,28 @@ async function runStratosIntegrationTest() {
   );
 
 
+  const lightDiagnostics =
+    runtime.getLightTelemetryDiagnostics();
+
+  assert.ok(
+    lightDiagnostics,
+    "Connected simulator frame should expose telemetry diagnostics"
+  );
+
+  assert.ok(
+    lightDiagnostics.topLevelKeys.includes(
+      "altitude"
+    ),
+    "Telemetry diagnostics should list actual FlightData keys"
+  );
+
+  assert.deepEqual(
+    lightDiagnostics.lightLikeKeys,
+    [],
+    "A frame without light fields should explicitly report no light-like keys"
+  );
+
+
   const request = {
     flightId: "DLH-LIVE-TEST",
     pilotName: "VirtualDLH Integration Test Pilot",

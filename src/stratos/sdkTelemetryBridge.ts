@@ -23,6 +23,80 @@ type UnknownRecord =
   Record<string, unknown>;
 
 
+export interface LightTelemetryDiagnostics {
+
+  topLevelKeys:
+    string[];
+
+  lightLikeKeys:
+    string[];
+
+  nestedLightKeys:
+    Record<string, string[]>;
+
+}
+
+
+function buildLightTelemetryDiagnostics(
+  data: FlightData
+): LightTelemetryDiagnostics {
+
+  const source =
+    data as unknown as UnknownRecord;
+
+  const topLevelKeys =
+    Object.keys(source).sort();
+
+  const lightLikeKeys =
+    topLevelKeys.filter(
+      key =>
+        /light|beacon|strobe|taxi|nav/i.test(
+          key
+        )
+    );
+
+  const nestedLightKeys:
+    Record<string, string[]> = {};
+
+
+  for (
+    const key of [
+      "lights",
+      "lightStates",
+      "aircraftLights"
+    ]
+  ) {
+
+    const value =
+      source[key];
+
+    if (
+      typeof value !== "object" ||
+      value === null ||
+      Array.isArray(value)
+    ) {
+
+      continue;
+
+    }
+
+    nestedLightKeys[key] =
+      Object.keys(
+        value as UnknownRecord
+      ).sort();
+
+  }
+
+
+  return {
+    topLevelKeys,
+    lightLikeKeys,
+    nestedLightKeys
+  };
+
+}
+
+
 function toOptionalBoolean(
   value: unknown
 ): boolean | undefined {
@@ -190,6 +264,10 @@ export class StratosSdkTelemetryBridge {
 
   private latestLandingAnalysis:
     LandingAnalysis | null = null;
+
+
+  private lightTelemetryDiagnostics:
+    LightTelemetryDiagnostics | null = null;
 
   private accumulator:
     FlightTelemetryAccumulator;
@@ -433,6 +511,14 @@ export class StratosSdkTelemetryBridge {
   }
 
 
+  getLightTelemetryDiagnostics():
+    LightTelemetryDiagnostics | null {
+
+    return this.lightTelemetryDiagnostics;
+
+  }
+
+
   private capture(
     snapshot: SimDataSnapshot
   ) {
@@ -443,6 +529,25 @@ export class StratosSdkTelemetryBridge {
     ) {
 
       return;
+
+    }
+
+
+    const diagnostics =
+      buildLightTelemetryDiagnostics(
+        snapshot.data
+      );
+
+
+    if (
+      !this.lightTelemetryDiagnostics ||
+      diagnostics.lightLikeKeys.length >
+        this.lightTelemetryDiagnostics
+          .lightLikeKeys.length
+    ) {
+
+      this.lightTelemetryDiagnostics =
+        diagnostics;
 
     }
 

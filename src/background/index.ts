@@ -64,6 +64,10 @@ let lastEvaluationSignature:
   string | null = null;
 
 
+let lightDiagnosticsLogged =
+  false;
+
+
 function clearLiveEvaluationHooks() {
 
   if (evaluationTimer) {
@@ -108,6 +112,9 @@ function clearLiveEvaluationHooks() {
 
   lastEvaluationSignature =
     null;
+
+  lightDiagnosticsLogged =
+    false;
 
 }
 
@@ -216,6 +223,36 @@ export default createPlugin({
           formatLightStatus(
             evaluation.lightStatus
           );
+
+
+        if (!lightDiagnosticsLogged) {
+
+          const diagnostics =
+            runtime.getLightTelemetryDiagnostics();
+
+          if (diagnostics) {
+
+            const nested =
+              Object.entries(
+                diagnostics.nestedLightKeys
+              )
+                .map(
+                  ([key, keys]) =>
+                    `${key}=[${keys.join(",")}]`
+                )
+                .join(";");
+
+            ctx.logger.info(
+              "VirtualDLH Flight Standards",
+              `Light telemetry diagnostic: topLevelKeys=[${diagnostics.topLevelKeys.join(",")}] lightLikeKeys=[${diagnostics.lightLikeKeys.join(",") || "NONE"}] nested=[${nested || "NONE"}]`
+            );
+
+            lightDiagnosticsLogged =
+              true;
+
+          }
+
+        }
 
 
         const signature = [

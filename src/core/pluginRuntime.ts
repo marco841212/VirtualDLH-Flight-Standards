@@ -92,6 +92,17 @@ export class PluginRuntime {
   }
 
 
+  getLightTelemetryDiagnostics() {
+
+    return (
+      this.stratosTelemetry
+        ?.getLightTelemetryDiagnostics()
+      ?? null
+    );
+
+  }
+
+
   async evaluateFlight(
     request: StandardsFlightRequest
   ) {
