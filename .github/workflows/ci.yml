@@ -40,7 +40,7 @@ jobs:
       - name: Upload Skyvex bundle artifact
         uses: actions/upload-artifact@v4
         with:
-          name: virtualdlh-stratos-v1.0.3
+          name: virtualdlh-stratos-v1.0.4
           path: bundle.zip
           if-no-files-found: error
           retention-days: 30
