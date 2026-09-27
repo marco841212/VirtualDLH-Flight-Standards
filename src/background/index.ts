@@ -67,6 +67,18 @@ let lastEvaluationSignature:
 let lightDiagnosticsLogged =
   false;
 
+let latestStandardsPayload:
+  Record<string, unknown> | null = null;
+
+let standardsSentKey:
+  string | null = null;
+
+let unsubscribeFlightUpdate:
+  (() => void) | null = null;
+
+let standardsRetryTimer:
+  ReturnType<typeof setTimeout> | null = null;
+
 
 function clearLiveEvaluationHooks() {
 
@@ -104,10 +116,38 @@ function clearLiveEvaluationHooks() {
   }
 
 
+  if (unsubscribeFlightUpdate) {
+
+    unsubscribeFlightUpdate();
+
+    unsubscribeFlightUpdate =
+      null;
+
+  }
+
+
+  if (standardsRetryTimer) {
+
+    clearTimeout(
+      standardsRetryTimer
+    );
+
+    standardsRetryTimer =
+      null;
+
+  }
+
+
   evaluationInProgress =
     false;
 
   liveFlightId =
+    null;
+
+  latestStandardsPayload =
+    null;
+
+  standardsSentKey =
     null;
 
   lastEvaluationSignature =
@@ -139,6 +179,131 @@ export default createPlugin({
 
     liveFlightId =
       `stratos-live-${Date.now()}`;
+
+
+
+    const sendStandardsWhenReady = async (
+      state?: any,
+      attempt = 0
+    ) => {
+
+      try {
+
+        const currentState =
+          state ?? await ctx.flight.getState();
+
+        const currentFlight =
+          currentState?.flight;
+
+        if (
+          !currentFlight ||
+          currentFlight.status !== "completed" ||
+          !latestStandardsPayload
+        ) {
+
+          return;
+
+        }
+
+
+        const sendKey =
+          `${currentFlight.stratosFlightId ?? ""}|${currentFlight.vaTrackingId ?? ""}`;
+
+
+        if (
+          sendKey === "|" ||
+          standardsSentKey === sendKey
+        ) {
+
+          return;
+
+        }
+
+
+        const client =
+          ctx.airline.createClient();
+
+
+        await client.post(
+          "/api/stratos/flights/standards",
+          {
+            stratos_flight_id:
+              currentFlight.stratosFlightId,
+
+            pirep_id:
+              currentFlight.vaTrackingId,
+
+            va_tracking_id:
+              currentFlight.vaTrackingId,
+
+            virtualdlh_standards:
+              latestStandardsPayload
+          }
+        );
+
+
+        standardsSentKey =
+          sendKey;
+
+
+        ctx.logger.info(
+          "VirtualDLH Flight Standards",
+          `Standards report uploaded: stratosFlightId=${currentFlight.stratosFlightId ?? "NONE"} pirepId=${currentFlight.vaTrackingId ?? "NONE"}`
+        );
+
+      } catch (error: any) {
+
+        const status =
+          error?.response?.status;
+
+
+        if (
+          status === 409 &&
+          attempt < 5
+        ) {
+
+          standardsRetryTimer =
+            setTimeout(
+              () => {
+                void sendStandardsWhenReady(
+                  undefined,
+                  attempt + 1
+                );
+              },
+              2000
+            );
+
+          return;
+
+        }
+
+
+        ctx.logger.warn(
+          "VirtualDLH Flight Standards",
+          `Standards upload failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        );
+
+      }
+
+    };
+
+
+    unsubscribeFlightUpdate =
+      ctx.flight.onUpdate(
+        (state) => {
+
+          if (
+            state?.flight?.status === "completed"
+          ) {
+
+            void sendStandardsWhenReady(
+              state
+            );
+
+          }
+
+        }
+      );
 
 
     const runEvaluation = async (
@@ -217,6 +382,46 @@ export default createPlugin({
           )
             ? evaluation.lightEvents.length
             : 0;
+
+
+        latestStandardsPayload = {
+          score:
+            typeof score === "number"
+              ? score
+              : null,
+
+          foqa:
+            typeof evaluation.foqaScore === "number"
+              ? evaluation.foqaScore
+              : null,
+
+          violations,
+          exceedances,
+
+          light_events:
+            lightEvents,
+
+          completion_state:
+            evaluation.evaluationComplete === true
+              ? "COMPLETE"
+              : "PENDING",
+
+          evaluation_complete:
+            evaluation.evaluationComplete === true,
+
+          rating:
+            evaluation.rating ?? null,
+
+          phase:
+            evaluation.phase ?? null
+        };
+
+
+        if (landingTriggered) {
+
+          void sendStandardsWhenReady();
+
+        }
 
 
         const lightStatus =
