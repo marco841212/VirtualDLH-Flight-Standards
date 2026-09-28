@@ -225,7 +225,7 @@ export default createPlugin({
 
 
         await client.post(
-          "/api/stratos/flights/standards",
+          "/flights/standards",
           {
             stratos_flight_id:
               currentFlight.stratosFlightId,
