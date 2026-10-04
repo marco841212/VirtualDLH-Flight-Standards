@@ -401,6 +401,15 @@ export default createPlugin({
           light_events:
             lightEvents,
 
+          lighting_events:
+            Array.isArray(evaluation.lightEvents)
+              ? evaluation.lightEvents
+              : [],
+
+          lights:
+            evaluation.lightStatus
+              ?? {},
+
           completion_state:
             evaluation.evaluationComplete === true
               ? "COMPLETE"
