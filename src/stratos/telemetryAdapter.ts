@@ -59,6 +59,8 @@ export interface StratosTelemetry {
 
   nav_light?: boolean;
 
+  engine_running?: boolean;
+
 }
 
 

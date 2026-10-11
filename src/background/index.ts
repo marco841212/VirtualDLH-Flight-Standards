@@ -406,6 +406,11 @@ export default createPlugin({
               ? evaluation.lightEvents
               : [],
 
+          phase_reports:
+            Array.isArray(evaluation.phaseReports)
+              ? evaluation.phaseReports
+              : [],
+
           lights:
             evaluation.lightStatus
               ?? {},
