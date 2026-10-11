@@ -251,6 +251,37 @@ function readLightState(
 }
 
 
+function readEngineRunning(
+  data: FlightData
+): boolean | undefined {
+
+  const source = data as unknown as UnknownRecord;
+  const count = source.enginesCount;
+
+  if (
+    typeof count !== "number" ||
+    !Number.isInteger(count) ||
+    count < 1 || count > 4
+  ) {
+    return undefined;
+  }
+
+  const states = Array.from({ length: count }, (_, index) =>
+    readBooleanField(source, [
+      `engine${index + 1}On`,
+      `engine${index + 1}Firing`
+    ])
+  );
+
+  // Never interpret absent engine telemetry as an engine shutdown.
+  if (states.some(state => state === undefined)) {
+    return undefined;
+  }
+
+  return states.some(state => state === true);
+}
+
+
 export class StratosSdkTelemetryBridge {
 
   private flight:
@@ -753,7 +784,10 @@ export class StratosSdkTelemetryBridge {
             "nav_light",
             "navigation_light"
           ]
-        )
+        ),
+
+      engine_running:
+        readEngineRunning(data)
 
     };
 
