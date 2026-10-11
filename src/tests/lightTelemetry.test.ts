@@ -73,6 +73,14 @@ const telemetryHistory = [
 ] as any;
 
 
+// Confirm the departure-to-climb landing-light OFF state with a
+// second stable sample (short single-frame glitches are ignored).
+telemetryHistory.push({
+  ...telemetryHistory[1],
+  timestamp: "2026-09-22T12:02:03.000Z"
+});
+
+
 const evaluation =
   evaluator.evaluate(
     {
@@ -146,3 +154,91 @@ assert.ok(
 console.log(
   "Light telemetry test passed"
 );
+
+
+// Regression: pulsing beacon/strobe telemetry must not generate
+// thousands of ON/OFF actions during a long flight.
+const flickerHistory = Array.from(
+  { length: 180 },
+  (_, second) => ({
+    timestamp: new Date(
+      Date.UTC(2026, 9, 11, 0, 0, second)
+    ).toISOString(),
+    phase: "CRUISE",
+    telemetry: {
+      altitude: 35000,
+      altitude_agl: 35000,
+      ground_speed: 450,
+      indicated_airspeed: 280,
+      vertical_speed: 0,
+      on_ground: false,
+      beacon_light:
+        second >= 120 && second < 139
+          ? false
+          : second % 2 === 0,
+      strobe_light:
+        second >= 120 && second < 139
+          ? false
+          : second % 3 === 0,
+      landing_lights: second >= 139,
+      taxi_light: false,
+      nav_light: true
+    }
+  })
+) as any;
+
+
+const filtered = evaluator.evaluate(
+  {
+    altitude: 35000,
+    altitudeAgl: 35000,
+    groundSpeed: 450,
+    indicatedAirspeed: 280,
+    verticalSpeed: 0,
+    onGround: false,
+    beaconLight: false,
+    strobeLight: false,
+    landingLights: true,
+    taxiLight: false,
+    navLight: true
+  },
+  undefined,
+  [],
+  flickerHistory,
+  "CRUISE" as any
+);
+
+
+assert.deepEqual(
+  filtered.lightEvents
+    .filter(event => event.light === "BEACON")
+    .map(event => event.state),
+  ["ON", "OFF", "ON"]
+);
+
+
+assert.deepEqual(
+  filtered.lightEvents
+    .filter(event => event.light === "STROBE")
+    .map(event => event.state),
+  ["ON", "OFF", "ON"]
+);
+
+
+assert.deepEqual(
+  filtered.lightEvents
+    .filter(event => event.light === "LANDING")
+    .map(event => event.state),
+  ["OFF", "ON"]
+);
+
+
+assert.ok(
+  filtered.lightEvents.length <= 12,
+  "Pulsing lights should not flood the event history"
+);
+
+
+// The last raw beacon frame is OFF, but its stable state is ON.
+assert.equal(filtered.lightStatus.beacon, true);
+assert.equal(filtered.lightStatus.strobe, true);

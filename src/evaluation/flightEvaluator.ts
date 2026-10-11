@@ -187,46 +187,23 @@ function latestHistoryLight(
 }
 
 
-function buildLightStatus(
-  history: FlightTelemetrySample[],
-  telemetry: FlightTelemetry
-): FlightLightStatus {
 
-  return {
-
-    beacon:
-      latestHistoryLight(
-        history,
-        "beacon_light"
-      ) ?? telemetry.beaconLight,
-
-    strobe:
-      latestHistoryLight(
-        history,
-        "strobe_light"
-      ) ?? telemetry.strobeLight,
-
-    landing:
-      latestHistoryLight(
-        history,
-        "landing_lights"
-      ) ?? telemetry.landingLights,
-
-    taxi:
-      latestHistoryLight(
-        history,
-        "taxi_light"
-      ) ?? telemetry.taxiLight,
-
-    navigation:
-      latestHistoryLight(
-        history,
-        "nav_light"
-      ) ?? telemetry.navLight
-
-  };
-
-}
+/**
+ * Simulator light flags may report flashing/pulsing output instead of
+ * an aircraft switch's steady logical state. Confirm sustained OFF
+ * readings before recording beacon/strobe shutdown, and debounce
+ * transient readings for steady lights.
+ */
+const LIGHT_STABILITY_MS: Record<
+  FlightLightName,
+  { on: number; off: number }
+> = {
+  BEACON: { on: 0, off: 8000 },
+  STROBE: { on: 0, off: 8000 },
+  LANDING: { on: 2000, off: 2000 },
+  TAXI: { on: 2000, off: 2000 },
+  NAVIGATION: { on: 2000, off: 2000 }
+};
 
 
 function buildLightEvents(
@@ -234,70 +211,126 @@ function buildLightEvents(
 ): FlightLightEvent[] {
 
   const events: FlightLightEvent[] = [];
-
-  const lastState =
-    new Map<
-      FlightLightName,
-      boolean
-    >();
-
+  const lastState = new Map<FlightLightName, boolean>();
+  const pending = new Map<
+    FlightLightName,
+    { value: boolean; since: number }
+  >();
 
   for (const sample of history) {
 
-    for (const item of LIGHT_FIELDS) {
+    const sampleTime = Date.parse(sample.timestamp);
 
-      const value =
-        sample.telemetry[
-          item.field
-        ];
-
-      if (typeof value !== "boolean") {
-
-        continue;
-
-      }
-
-
-      if (
-        lastState.get(item.light) === value
-      ) {
-
-        continue;
-
-      }
-
-
-      events.push({
-
-        light:
-          item.light,
-
-        state:
-          value ? "ON" : "OFF",
-
-        timestamp:
-          sample.timestamp,
-
-        phase:
-          sample.phase
-            ? String(sample.phase)
-            : null
-
-      });
-
-
-      lastState.set(
-        item.light,
-        value
-      );
-
+    if (!Number.isFinite(sampleTime)) {
+      continue;
     }
 
+    for (const item of LIGHT_FIELDS) {
+
+      const value = sample.telemetry[item.field];
+
+      if (typeof value !== "boolean") {
+        continue;
+      }
+
+      const previous = lastState.get(item.light);
+
+      if (previous === undefined) {
+
+        // Record the first known state once, not once per sample.
+        events.push({
+          light: item.light,
+          state: value ? "ON" : "OFF",
+          timestamp: sample.timestamp,
+          phase: sample.phase ? String(sample.phase) : null
+        });
+
+        lastState.set(item.light, value);
+        continue;
+      }
+
+      if (previous === value) {
+        pending.delete(item.light);
+        continue;
+      }
+
+      let candidate = pending.get(item.light);
+
+      if (!candidate || candidate.value !== value) {
+        candidate = { value, since: sampleTime };
+        pending.set(item.light, candidate);
+      }
+
+      const confirmationMs =
+        LIGHT_STABILITY_MS[item.light][value ? "on" : "off"];
+
+      if (sampleTime - candidate.since < confirmationMs) {
+        continue;
+      }
+
+      events.push({
+        light: item.light,
+        state: value ? "ON" : "OFF",
+        timestamp: sample.timestamp,
+        phase: sample.phase ? String(sample.phase) : null
+      });
+
+      lastState.set(item.light, value);
+      pending.delete(item.light);
+    }
   }
 
-
   return events;
+}
 
+
+function latestStableLight(
+  events: FlightLightEvent[],
+  light: FlightLightName
+): boolean | undefined {
+
+  for (let index = events.length - 1; index >= 0; index--) {
+    if (events[index].light === light) {
+      return events[index].state === "ON";
+    }
+  }
+
+  return undefined;
+}
+
+
+function buildLightStatus(
+  history: FlightTelemetrySample[],
+  telemetry: FlightTelemetry,
+  events: FlightLightEvent[]
+): FlightLightStatus {
+
+  return {
+    beacon:
+      latestStableLight(events, "BEACON")
+      ?? latestHistoryLight(history, "beacon_light")
+      ?? telemetry.beaconLight,
+
+    strobe:
+      latestStableLight(events, "STROBE")
+      ?? latestHistoryLight(history, "strobe_light")
+      ?? telemetry.strobeLight,
+
+    landing:
+      latestStableLight(events, "LANDING")
+      ?? latestHistoryLight(history, "landing_lights")
+      ?? telemetry.landingLights,
+
+    taxi:
+      latestStableLight(events, "TAXI")
+      ?? latestHistoryLight(history, "taxi_light")
+      ?? telemetry.taxiLight,
+
+    navigation:
+      latestStableLight(events, "NAVIGATION")
+      ?? latestHistoryLight(history, "nav_light")
+      ?? telemetry.navLight
+  };
 }
 
 
@@ -385,16 +418,17 @@ export class FlightEvaluator {
       );
 
 
-    const lightStatus =
-      buildLightStatus(
-        telemetryHistory,
-        telemetry
-      );
-
-
     const lightEvents =
       buildLightEvents(
         telemetryHistory
+      );
+
+
+    const lightStatus =
+      buildLightStatus(
+        telemetryHistory,
+        telemetry,
+        lightEvents
       );
 
 
