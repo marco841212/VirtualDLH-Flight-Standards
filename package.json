@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "build:plugin": "node scripts/build-plugin.mjs",
-    "test": "tsc --noEmit && npm run test:phase && npm run test:phase-precedence && npm run test:lights",
+    "test": "tsc --noEmit && npm run test:phase && npm run test:phase-precedence && npm run test:lights && npm run test:phases",
     "test:phase": "npm run build && node dist/tests/phaseDetector.test.js",
     "test:phase-precedence": "npm run build && node dist/tests/phasePrecedence.test.js",
     "test:flight": "npm run build && node dist/tests/normalFlight.test.js",
@@ -18,6 +18,7 @@
     "test:approach": "npm run build && node dist/tests/approach.test.js",
     "test:landing": "npm run build && node dist/tests/landing.test.js",
     "test:lights": "npm run build && node dist/tests/lightTelemetry.test.js",
+    "test:phases": "npm run build && node dist/tests/phaseReports.test.js",
     "test:stratos-integration": "npm run build && node dist/tests/stratosIntegration.test.js"
   },
   "devDependencies": {
