@@ -11,6 +11,9 @@ import type {
   FlightTelemetrySample
 } from "../stratos/flightTelemetryAccumulator.js";
 
+import { buildFlightPhaseReports } from "../stratos/flightPhaseReports.js";
+import type { FlightPhaseReport } from "../stratos/flightPhaseReports.js";
+
 import {
   PhaseDetector,
   FlightTelemetry,
@@ -370,6 +373,8 @@ export interface FlightEvaluation {
 
   lightEvents: FlightLightEvent[];
 
+  phaseReports: FlightPhaseReport[];
+
 }
 
 
@@ -422,6 +427,10 @@ export class FlightEvaluator {
       buildLightEvents(
         telemetryHistory
       );
+
+
+    const phaseReports =
+      buildFlightPhaseReports(telemetryHistory, lightEvents);
 
 
     const lightStatus =
@@ -790,7 +799,9 @@ export class FlightEvaluator {
       lightStatus,
 
 
-      lightEvents
+      lightEvents,
+
+      phaseReports
 
     };
 
